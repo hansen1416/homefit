@@ -1,5 +1,5 @@
 <script>
-
+	import ThreeScene from "$lib/ThreeScene";
 </script>
 
 <svelte:head>
