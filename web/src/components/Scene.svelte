@@ -60,6 +60,7 @@
 	import { onDestroy, onMount } from "svelte";
 	import ThreeScene from "../lib/ThreeScene";
 	import RapierWorld from "../lib/RapierWorld";
+	import Stats from "three/examples/jsm/libs/stats.module.js";
 
 	/** @type {HTMLVideoElement} */
 	let video;
@@ -74,23 +75,20 @@
 	/** @type {RapierWorld} */
 	let physicsWorld;
 
+	let stats;
+
 	function animate() {
 		// update physics world and threejs renderer
-		// threeScene.onFrameUpdate();
-		// physicsWorld.onFrameUpdate();
+		threeScene.onFrameUpdate(stats);
+
+		if (physicsWorld) {
+			physicsWorld.onFrameUpdate();
+		}
 
 		animationPointer = requestAnimationFrame(animate);
 	}
 
 	onMount(() => {
-		// 		let stats;
-		// if (import.meta.env.DEV) {
-		// import Stats from "three/examples/jsm/libs/stats.module.js";
-		// 	stats = new Stats();
-		// 	stats.showPanel(1);
-		// 	document.body.appendChild(stats.dom);
-		// }
-
 		const sceneWidth = document.documentElement.clientWidth;
 		const sceneHeight = document.documentElement.clientHeight;
 
@@ -99,6 +97,12 @@
 		Promise.all([import("@dimforge/rapier3d")]).then(([RAPIER]) => {
 			physicsWorld = new RapierWorld(RAPIER);
 		});
+
+		if (import.meta.env.DEV) {
+			stats = new Stats();
+			stats.showPanel(1);
+			document.body.appendChild(stats.dom);
+		}
 
 		animate();
 	});

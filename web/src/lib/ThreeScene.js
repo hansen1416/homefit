@@ -97,7 +97,7 @@ export default class ThreeScene {
 		this.renderer.setSize(width, height);
 	}
 
-	onFrameUpdate() {
+	onFrameUpdate(stats) {
 		// this.controls.update();
 
 		this.renderer.render(this.scene, this.camera);
