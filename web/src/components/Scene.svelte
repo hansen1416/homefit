@@ -122,7 +122,9 @@
 
 		const fbxLoader = new FBXLoader();
 		fbxLoader.load(
-			"yoga1.fbx",
+			"standard_female.fbx",
+			// "chibi.fbx",
+			// "yoga1.fbx",
 			// "Taunt.fbx",
 			(object) => {
 				// object.traverse(function (child) {
@@ -136,6 +138,8 @@
 				// object.scale.set(.01, .01, .01)
 
 				threeScene.scene.add(object);
+
+				object.position.set(0, -100, 0);
 
 				console.log(object);
 
