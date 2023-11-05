@@ -58,9 +58,12 @@
 	*/
 
 	import { onDestroy, onMount } from "svelte";
+	import * as THREE from "three";
 	import ThreeScene from "../lib/ThreeScene";
 	import RapierWorld from "../lib/RapierWorld";
 	import Stats from "three/examples/jsm/libs/stats.module.js";
+	import { browser } from "$app/environment"; // false on SSR, true in the browser
+	import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 
 	/** @type {HTMLVideoElement} */
 	let video;
@@ -77,13 +80,24 @@
 
 	let stats;
 
+	let mixer;
+
+	const clock = new THREE.Clock();
+
+	let model_ready = false;
+
 	function animate() {
 		// update physics world and threejs renderer
 		threeScene.onFrameUpdate(stats);
 
-		if (physicsWorld) {
-			physicsWorld.onFrameUpdate();
+		if (model_ready) {
+			mixer.update(clock.getDelta());
+			// console.log(1);
 		}
+
+		// if (physicsWorld) {
+		// 	physicsWorld.onFrameUpdate();
+		// }
 
 		animationPointer = requestAnimationFrame(animate);
 	}
@@ -104,12 +118,59 @@
 			document.body.appendChild(stats.dom);
 		}
 
+		// threeScene.loadFbx("yoga1.fbx");
+
+		const fbxLoader = new FBXLoader();
+		fbxLoader.load(
+			"yoga1.fbx",
+			// "Taunt.fbx",
+			(object) => {
+				// object.traverse(function (child) {
+				//     if ((child as THREE.Mesh).isMesh) {
+				//         // (child as THREE.Mesh).material = material
+				//         if ((child as THREE.Mesh).material) {
+				//             ((child as THREE.Mesh).material as THREE.MeshBasicMaterial).transparent = false
+				//         }
+				//     }
+				// })
+				// object.scale.set(.01, .01, .01)
+
+				threeScene.scene.add(object);
+
+				console.log(object);
+
+				// Create an AnimationMixer, and get the list of AnimationClip instances
+				mixer = new THREE.AnimationMixer(object);
+				// const clips = mesh.animations;
+
+				console.log(object.animations[0]);
+
+				const action = mixer.clipAction(object.animations[0]);
+
+				action.play();
+
+				model_ready = true;
+			},
+			(xhr) => {
+				console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+			},
+			(error) => {
+				console.log(error);
+			}
+		);
+
 		animate();
 	});
 
-	// onDestroy(() => {
-	// 	cancelAnimationFrame(animationPointer);
-	// });
+	/**
+	 * Out of onMount, beforeUpdate, afterUpdate and onDestroy,
+	 * this is the only one that runs inside a server-side component.
+	 */
+	onDestroy(() => {
+		if (browser) {
+			cancelAnimationFrame(animationPointer);
+		}
+	});
 </script>
 
 <canvas bind:this={canvas} />
@@ -129,7 +190,7 @@
 
 <style>
 	canvas {
-		/* this will only affect <p> elements in this component */
+		/* this will only affect <canvas> elements in this component */
 		z-index: -1;
 		position: absolute;
 		top: 0;
