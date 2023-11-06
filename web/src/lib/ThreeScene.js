@@ -3,7 +3,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 
 export const SceneProperties = {
-	camera_height: 50,
+	camera_height: 0,
 	camera_far_z: 200,
 };
 

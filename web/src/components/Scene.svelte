@@ -108,6 +108,8 @@
 
 		threeScene = new ThreeScene(canvas, sceneWidth, sceneHeight);
 
+		threeScene.scene.position.set(0, -100, 0);
+
 		Promise.all([import("@dimforge/rapier3d")]).then(([RAPIER]) => {
 			physicsWorld = new RapierWorld(RAPIER);
 		});
@@ -138,8 +140,6 @@
 				// object.scale.set(.01, .01, .01)
 
 				threeScene.scene.add(object);
-
-				object.position.set(0, 0, 0);
 
 				console.log(object);
 
