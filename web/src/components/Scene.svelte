@@ -63,7 +63,9 @@
 	import RapierWorld from "../lib/RapierWorld";
 	import Stats from "three/examples/jsm/libs/stats.module.js";
 	import { browser } from "$app/environment"; // false on SSR, true in the browser
-	import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
+	// import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
+	import { loadJSON, loadFBX } from "../utils/ropes";
+	// import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 
 	/** @type {HTMLVideoElement} */
 	let video;
@@ -120,48 +122,96 @@
 			document.body.appendChild(stats.dom);
 		}
 
-		// threeScene.loadFbx("yoga1.fbx");
+		Promise.all([
+			loadFBX("mixamo1.fbx"),
+			loadJSON("mixamo_anim.json"),
+		]).then(([fbx, anim]) => {
+			// console.log(fbx, anim);
 
-		const fbxLoader = new FBXLoader();
-		fbxLoader.load(
-			// "standard_female.fbx",
-			// "chibi.fbx",
-			"yoga1.fbx",
-			// "Taunt.fbx",
-			(object) => {
-				// object.traverse(function (child) {
-				//     if ((child as THREE.Mesh).isMesh) {
-				//         // (child as THREE.Mesh).material = material
-				//         if ((child as THREE.Mesh).material) {
-				//             ((child as THREE.Mesh).material as THREE.MeshBasicMaterial).transparent = false
-				//         }
-				//     }
-				// })
-				// object.scale.set(.01, .01, .01)
+			threeScene.scene.add(fbx);
 
-				threeScene.scene.add(object);
+			// // Create an AnimationMixer, and get the list of AnimationClip instances
+			mixer = new THREE.AnimationMixer(fbx);
+			// const clips = mesh.animations;
 
-				console.log(object);
+			// console.log(object.animations[0]);
 
-				// Create an AnimationMixer, and get the list of AnimationClip instances
-				mixer = new THREE.AnimationMixer(object);
-				// const clips = mesh.animations;
+			const clip = THREE.AnimationClip.parse(anim);
 
-				console.log(object.animations[0]);
+			console.log(clip);
 
-				const action = mixer.clipAction(object.animations[0]);
+			const action = mixer.clipAction(clip);
 
-				action.play();
+			action.play();
 
-				model_ready = true;
-			},
-			(xhr) => {
-				console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
-			},
-			(error) => {
-				console.log(error);
-			}
-		);
+			model_ready = true;
+		});
+
+		// const fbxLoader = new FBXLoader();
+		// fbxLoader.load(
+		// 	// "standard_female.fbx",
+		// 	// "chibi.fbx",
+		// 	// "yoga1.fbx",
+		// 	"Taunt.fbx",
+		// 	// "mixamo1.fbx",
+		// 	(object) => {
+		// 		// object.traverse(function (child) {
+		// 		//     if ((child as THREE.Mesh).isMesh) {
+		// 		//         // (child as THREE.Mesh).material = material
+		// 		//         if ((child as THREE.Mesh).material) {
+		// 		//             ((child as THREE.Mesh).material as THREE.MeshBasicMaterial).transparent = false
+		// 		//         }
+		// 		//     }
+		// 		// })
+		// 		// object.scale.set(.01, .01, .01)
+
+		// 		threeScene.scene.add(object);
+
+		// 		// console.log(object);
+
+		// 		// // Create an AnimationMixer, and get the list of AnimationClip instances
+		// 		mixer = new THREE.AnimationMixer(object);
+		// 		// const clips = mesh.animations;
+
+		// 		console.log(object.animations[0]);
+
+		// 		const action = mixer.clipAction(object.animations[0]);
+
+		// 		action.play();
+
+		// 		model_ready = true;
+		// 	},
+		// 	(xhr) => {
+		// 		console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+		// 	},
+		// 	(error) => {
+		// 		console.log(error);
+		// 	}
+		// );
+
+		// fbxLoader.load(
+		// 	"Taunt.fbx",
+		// 	(object) => {
+		// 		console.log("taunt", object);
+
+		// 		threeScene.scene.add(object);
+
+		// 		// console.log(object.animations[0].tracks);
+		// 	},
+		// 	(xhr) => {
+		// 		console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+		// 	},
+		// 	(error) => {
+		// 		console.log(error);
+		// 	}
+		// );
+
+		// const objLoader = new OBJLoader();
+		// objLoader.load("rpm.glb", (object) => {
+		// 	threeScene.scene.add(object);
+
+		// 	// console.log("glb obj", object);
+		// });
 
 		animate();
 	});
