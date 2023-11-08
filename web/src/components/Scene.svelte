@@ -123,28 +123,25 @@
 		}
 
 		Promise.all([
-			loadFBX("mixamo1.fbx"),
+			loadFBX("mixamo2.fbx"),
 			loadJSON("mixamo_anim.json"),
 		]).then(([fbx, anim]) => {
-			// console.log(fbx, anim);
+			console.log(fbx, anim);
 
 			threeScene.scene.add(fbx);
 
-			// // Create an AnimationMixer, and get the list of AnimationClip instances
+			// Create an AnimationMixer, and get the list of AnimationClip instances
 			mixer = new THREE.AnimationMixer(fbx);
-			// const clips = mesh.animations;
 
-			// console.log(object.animations[0]);
+			// console.log(fbx.animations[0]);
 
 			const clip = THREE.AnimationClip.parse(anim);
-
-			console.log(clip);
-
 			const action = mixer.clipAction(clip);
+			// const action = mixer.clipAction(fbx.animations[0]);
 
-			action.play();
+			// action.play();
 
-			model_ready = true;
+			// model_ready = true;
 		});
 
 		// const fbxLoader = new FBXLoader();

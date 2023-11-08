@@ -53,7 +53,7 @@ export default class ThreeScene {
 		this.camera.position.set(
 			0,
 			SceneProperties.camera_height,
-			-SceneProperties.camera_far_z
+			SceneProperties.camera_far_z
 		);
 
 		this.camera.updateProjectionMatrix(); // update the camera's projection matrix
@@ -70,11 +70,11 @@ export default class ThreeScene {
 		// this.light.shadow.mapSize.height = 2048;
  */
 		this.light = new THREE.DirectionalLight(0xffffff, 0.9);
-		this.light.position.set(0, 1000, 0);
+		this.light.position.set(0, 100, 0);
 		this.light.castShadow = true;
 
 		this.light.target = new THREE.Object3D();
-		this.light.target.position.set(0, 0, 1000);
+		this.light.target.position.set(0, 0, -100);
 
 		this.scene.add(this.light);
 		this.scene.add(this.light.target);
