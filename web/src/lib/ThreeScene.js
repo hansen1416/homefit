@@ -1,25 +1,14 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import Stats from "three/examples/jsm/libs/stats.module.js";
-/** @type {Stats} */
-let stats;
-
-if (import.meta.env.DEV) {
-	stats = new Stats();
-
-	stats.showPanel(1);
-
-	document.body.appendChild(stats.dom);
-}
+import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 
 export const SceneProperties = {
-	camera_height: 1.4,
-	camera_far_z: 6,
+	camera_height: 0,
+	camera_far_z: 200,
 };
 
 Object.freeze(SceneProperties);
 
-/** @type {ThreeScene} */
 let instance;
 
 export default class ThreeScene {
@@ -109,8 +98,8 @@ export default class ThreeScene {
 		this.renderer.setSize(width, height);
 	}
 
-	onFrameUpdate() {
-		// this.controls.update();
+	onFrameUpdate(stats) {
+		this.controls.update();
 
 		this.renderer.render(this.scene, this.camera);
 
@@ -119,51 +108,42 @@ export default class ThreeScene {
 		}
 	}
 
-	/**
-	 *
-	 * @returns {THREE.Mesh}
-	 */
-	createProjectile() {
-		const mesh = new THREE.Mesh(
-			new THREE.SphereGeometry(0.1), // @ts-ignore
-			new THREE.MeshNormalMaterial()
-		);
-		mesh.castShadow = true;
-
-		this.scene.add(mesh);
-
-		return mesh;
-	}
-
-	/**
-	 *
-	 * @param {import("./RapierWorld").vec3} pos
-	 */
-	createRandomSample(pos) {
-		const mesh = new THREE.Mesh(
-			new THREE.BoxGeometry(0.8, 1.6, 0.6),
-			new THREE.MeshBasicMaterial({ color: 0xff0099 })
-		);
-
-		mesh.position.set(pos.x, pos.y, pos.z);
-
-		mesh.castShadow = true;
-
-		this.scene.add(mesh);
-
-		return mesh;
-	}
-
-	/**
-	 *
-	 * @param {THREE.Mesh} player_obj
-	 */
-	removePlayerObj(player_obj) {
-		console.info("todo remove", player_obj);
-	}
-
 	resetControl() {
 		this.controls.reset();
+	}
+
+	loadFbx(url) {
+		const fbxLoader = new FBXLoader();
+		fbxLoader.load(
+			url,
+			(object) => {
+				// object.traverse(function (child) {
+				//     if ((child as THREE.Mesh).isMesh) {
+				//         // (child as THREE.Mesh).material = material
+				//         if ((child as THREE.Mesh).material) {
+				//             ((child as THREE.Mesh).material as THREE.MeshBasicMaterial).transparent = false
+				//         }
+				//     }
+				// })
+				// object.scale.set(.01, .01, .01)
+
+				this.scene.add(object);
+
+				console.log(object);
+
+				// Create an AnimationMixer, and get the list of AnimationClip instances
+				const mixer = new THREE.AnimationMixer(object);
+				// const clips = mesh.animations;
+
+				mixer.clipAction(object.animations[0]);
+			},
+			(xhr) => {
+				console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+			},
+			(error) => {
+				console.log(error);
+			}
+		);
 	}
 
 	/**

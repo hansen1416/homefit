@@ -1,20 +1,11 @@
 <script>
-	import Header from './Header.svelte';
-	import './styles.css';
+	import "./layout.css";
 </script>
 
-<div class="app">
-	<Header />
+<nav>
+	<a href="/">Home</a>
+	<a href="/about">About</a>
+	<a href="/settings">Settings</a>
+</nav>
 
-	<main>
-		<slot />
-	</main>
-
-	<footer>
-		<p>footer</p>
-	</footer>
-</div>
-
-<style>
-	
-</style>
+<slot />

@@ -1,8 +1,4 @@
-<svelte:head>
-	<title>About</title>
-	<meta name="description" content="About this app" />
-</svelte:head>
+<script>
+</script>
 
-<div class="text-column">
-	<h1>About this app</h1>
-</div>
+<h1>About</h1>
