@@ -60,10 +60,10 @@
 	import { onDestroy, onMount } from "svelte";
 	import * as THREE from "three";
 	import ThreeScene from "../lib/ThreeScene";
-	import RapierWorld from "../lib/RapierWorld";
+	// import RapierWorld from "../lib/RapierWorld";
 	import Stats from "three/examples/jsm/libs/stats.module.js";
 	// import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
-	import { loadJSON, loadFBX } from "../utils/ropes";
+	import { loadFBX, createPoseLandmarker } from "../utils/ropes";
 	// import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 
 	/** @type {HTMLVideoElement} */
@@ -76,8 +76,8 @@
 
 	/** @type {ThreeScene} */
 	let threeScene;
-	/** @type {RapierWorld} */
-	let physicsWorld;
+	// /** @type {RapierWorld} */
+	// let physicsWorld;
 
 	let stats;
 
@@ -86,6 +86,8 @@
 	const clock = new THREE.Clock();
 
 	let model_ready = false;
+
+	let poseDetector, poseDetectorAvailable;
 
 	function animate() {
 		// update physics world and threejs renderer
@@ -111,15 +113,21 @@
 
 		threeScene.scene.position.set(0, -100, 0);
 
-		Promise.all([import("@dimforge/rapier3d")]).then(([RAPIER]) => {
-			physicsWorld = new RapierWorld(RAPIER);
-		});
+		// Promise.all([import("@dimforge/rapier3d")]).then(([RAPIER]) => {
+		// 	physicsWorld = new RapierWorld(RAPIER);
+		// });
 
 		if (import.meta.env.DEV) {
 			stats = new Stats();
 			stats.showPanel(1);
 			document.body.appendChild(stats.dom);
 		}
+
+		createPoseLandmarker().then((pose) => {
+			poseDetector = pose;
+
+			poseDetectorAvailable = true;
+		});
 
 		Promise.all([
 			loadFBX("mixamo2.fbx"),
@@ -154,26 +162,26 @@
 	 * this is the only one that runs inside a server-side component.
 	 */
 	onDestroy(() => {
-
-			cancelAnimationFrame(animationPointer);
-		
+		cancelAnimationFrame(animationPointer);
 	});
 </script>
 
-<canvas bind:this={canvas} />
-<canvas />
+<!-- section is not needed, only for readablity -->
+<section>
+	<canvas bind:this={canvas} />
 
-<video
-	bind:this={video}
-	autoPlay={true}
-	width={480 / 2}
-	height={360 / 2}
-	style="position: absolute; top:0; left: 0; display: {showVideo
-		? 'block'
-		: 'none'}"
->
-	<track label="English" kind="captions" default />
-</video>
+	<video
+		bind:this={video}
+		autoPlay={true}
+		width={480 / 2}
+		height={360 / 2}
+		style="position: absolute; top:0; left: 0; display: {showVideo
+			? 'block'
+			: 'none'}"
+	>
+		<track label="English" kind="captions" default />
+	</video>
+</section>
 
 <style>
 	canvas {
