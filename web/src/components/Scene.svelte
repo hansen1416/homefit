@@ -63,8 +63,13 @@
 	// import RapierWorld from "../lib/RapierWorld";
 	import Stats from "three/examples/jsm/libs/stats.module.js";
 	// import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
-	import { loadFBX, createPoseLandmarker } from "../utils/ropes";
+	import {
+		loadFBX,
+		createPoseLandmarker,
+		invokeCamera,
+	} from "../utils/ropes";
 	// import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
+	import { cloneDeep } from "lodash";
 
 	/** @type {HTMLVideoElement} */
 	let video;
@@ -73,6 +78,8 @@
 
 	let showVideo = false;
 	let animationPointer = 0;
+
+	let capturePose = false;
 
 	/** @type {ThreeScene} */
 	let threeScene;
@@ -98,9 +105,21 @@
 			// console.log(1);
 		}
 
-		// if (physicsWorld) {
-		// 	physicsWorld.onFrameUpdate();
-		// }
+		// ========= captured pose logic
+		if (
+			capturePose &&
+			video &&
+			video.readyState >= 2 &&
+			poseDetectorAvailable &&
+			poseDetector
+		) {
+			poseDetectorAvailable = false;
+			poseDetector.detectForVideo(
+				video,
+				performance.now(),
+				onPoseCallback
+			);
+		}
 
 		animationPointer = requestAnimationFrame(animate);
 	}
@@ -122,6 +141,8 @@
 			stats.showPanel(1);
 			document.body.appendChild(stats.dom);
 		}
+
+		invokeCamera(video, () => {});
 
 		createPoseLandmarker().then((pose) => {
 			poseDetector = pose;
@@ -164,6 +185,22 @@
 	onDestroy(() => {
 		cancelAnimationFrame(animationPointer);
 	});
+
+	function onPoseCallback(result) {
+		if (!result || !result.worldLandmarks || !result.worldLandmarks[0]) {
+			poseDetectorAvailable = true;
+			return;
+		}
+
+		const pose3D = cloneDeep(result.worldLandmarks[0]);
+		const pose2D = cloneDeep(result.landmarks[0]);
+
+		console.log(pose2D, pose3D);
+
+		// boxerController.onPoseCallback(pose3D, pose2D, false);
+
+		poseDetectorAvailable = true;
+	}
 </script>
 
 <!-- section is not needed, only for readablity -->
@@ -181,6 +218,39 @@
 	>
 		<track label="English" kind="captions" default />
 	</video>
+
+	<div class="controls">
+		<div>
+			<button
+				on:click={() => {
+					threeScene.resetControl();
+				}}>Reset Control</button
+			>
+
+			{#if showVideo}
+				<button
+					on:click={() => {
+						showVideo = !showVideo;
+					}}>hide video</button
+				>
+			{:else}
+				<button
+					on:click={() => {
+						showVideo = !showVideo;
+					}}>show video</button
+				>
+			{/if}
+
+			<button
+				class={capturePose ? "active" : ""}
+				on:click={() => {
+					capturePose = !capturePose;
+
+					// console.log(big_obj);
+				}}>Capture Pose</button
+			>
+		</div>
+	</div>
 </section>
 
 <style>
@@ -192,5 +262,14 @@
 		left: 0;
 		bottom: 0;
 		right: 0;
+	}
+
+	.controls {
+		position: absolute;
+		bottom: 0;
+		right: 0;
+		padding: 10px;
+		display: flex;
+		justify-content: space-between;
 	}
 </style>
