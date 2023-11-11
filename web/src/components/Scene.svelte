@@ -195,8 +195,6 @@
 		const pose3D = cloneDeep(result.worldLandmarks[0]);
 		const pose2D = cloneDeep(result.landmarks[0]);
 
-		console.log(pose2D, pose3D);
-
 		// boxerController.onPoseCallback(pose3D, pose2D, false);
 
 		poseDetectorAvailable = true;
