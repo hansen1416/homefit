@@ -62,6 +62,7 @@
 	import ThreeScene from "../lib/ThreeScene";
 	import RapierWorld from "../lib/RapierWorld";
 	import Stats from "three/examples/jsm/libs/stats.module.js";
+	import { browser } from "$app/environment"; // false on SSR, true in the browser
 	// import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 	import { loadJSON, loadFBX } from "../utils/ropes";
 	// import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
@@ -154,9 +155,9 @@
 	 * this is the only one that runs inside a server-side component.
 	 */
 	onDestroy(() => {
-
+		if (browser) {
 			cancelAnimationFrame(animationPointer);
-		
+		}
 	});
 </script>
 

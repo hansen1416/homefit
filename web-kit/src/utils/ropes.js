@@ -4,7 +4,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 import { Quaternion } from "three";
-import { PoseLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
+// import { PoseLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
 
 export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -431,8 +431,19 @@ export function loadGLTF(url) {
 
 export function loadFBX(url) {
 	return new Promise((resolve) => {
-		const loader = new FBXLoader();
-		loader.load(url, (fbx) => resolve(fbx));
+		const fbxLoader = new FBXLoader();
+		fbxLoader.load(
+			url,
+			(object) => {
+				resolve(object);
+			},
+			(xhr) => {
+				console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+			},
+			(error) => {
+				console.log(error);
+			}
+		);
 	});
 }
 
@@ -1428,21 +1439,21 @@ export function ballMesh() {
  *
  * @returns
  */
-export async function createPoseLandmarker() {
-	const vision = await FilesetResolver.forVisionTasks("/tasks-vision/wasm");
-	return await PoseLandmarker.createFromOptions(vision, {
-		baseOptions: {
-			modelAssetPath: `/tasks-vision/pose_landmarker_lite.task`,
-			delegate: "GPU",
-		},
-		runningMode: "VIDEO",
-		numPoses: 1,
-		minPoseDetectionConfidence: 0.5,
-		minPosePresenceConfidence: 0.5,
-		minTrackingConfidence: 0.5,
-		outputSegmentationMasks: false,
-	});
-}
+// export async function createPoseLandmarker() {
+// 	const vision = await FilesetResolver.forVisionTasks("/tasks-vision/wasm");
+// 	return await PoseLandmarker.createFromOptions(vision, {
+// 		baseOptions: {
+// 			modelAssetPath: `/tasks-vision/pose_landmarker_lite.task`,
+// 			delegate: "GPU",
+// 		},
+// 		runningMode: "VIDEO",
+// 		numPoses: 1,
+// 		minPoseDetectionConfidence: 0.5,
+// 		minPosePresenceConfidence: 0.5,
+// 		minTrackingConfidence: 0.5,
+// 		outputSegmentationMasks: false,
+// 	});
+// }
 
 export function pointsDiff(v1, v2) {
 	return Math.sqrt(
@@ -1503,8 +1514,8 @@ export function readBuffer(buffer) {
 /**
  * looping in a spiral, generate a array of points, that is grow in a spiral manner
  * https://www.baeldung.com/cs/looping-spiral
- * 
- * @param {number} radius 
+ *
+ * @param {number} radius
  * @returns {Array}
  */
 export function spiralArray(radius) {
@@ -1514,7 +1525,7 @@ export function spiralArray(radius) {
 	let dx = 0;
 	let dy = -1;
 
-	const arr = []
+	const arr = [];
 
 	for (let i = 0; i < radius ** 2; i++) {
 		if (
@@ -1523,7 +1534,7 @@ export function spiralArray(radius) {
 			-radius / 2 < y &&
 			y <= radius / 2
 		) {
-			arr.push([x, y])
+			arr.push([x, y]);
 		}
 
 		if (x === y || (x < 0 && x === -y) || (x > 0 && x === 1 - y)) {
@@ -1533,18 +1544,17 @@ export function spiralArray(radius) {
 		[x, y] = [x + dx, y + dy];
 	}
 
-	return arr
+	return arr;
 }
 
 /**
- * 
- * @param {number} num 
- * @returns 
+ *
+ * @param {number} num
+ * @returns
  */
 export function pad0(num) {
 	return ("00000000" + num).slice(-8);
 }
-
 
 /**
  * calf_l

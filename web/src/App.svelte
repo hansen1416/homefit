@@ -1,11 +1,11 @@
 <script>
 	import { Router, Route } from "svelte-routing";
-	// import Place from "./routes/Place.svelte";
+	import Home from "./routes/Home.svelte";
 </script>
 
 <Router>
 	<div>
 		<!-- <Route path="/blog/:id" component={BlogPost} /> -->
-		<!-- <Route path="/place" component={Place} /> -->
+		<Route path="/" component={Home} />
 	</div>
 </Router>
