@@ -1,62 +1,4 @@
 <script>
-	/**
-	 * 
-	 
-		// logic goes here
-
-		export let title;
-		export let person;
-
-		// this will update `document.title` whenever
-		// the `title` prop changes
-		$: document.title = title;
-
-		$: {
-			console.log(`multiple statements can be combined`);
-			console.log(`the current title is ${title}`);
-		}
-
-		// this will update `name` when 'person' changes
-		$: ({ name } = person);
-
-		// don't do this. it will run before the previous line
-		let name2 = name;
-
-		// Only values which directly appear within the $: block will become dependencies
-		// of the reactive statement.
-		// For example, in the code below total will only update when x changes, but not y.
-		let x = 0;
-		let y = 0;
-
-		
-		function yPlusAValue(value) {
-			return value + y;
-		}
-
-		$: total = yPlusAValue(x);
-
-		// It is important to note that the reactive blocks are ordered
-		// via simple static analysis at compile time,
-		// and all the compiler looks at are the variables that are assigned to
-		// and used within the block itself, not in any functions called by them.
-		// This means that yDependent will not be updated
-		// when x is updated in the following example:
-		let x = 0;
-		let y = 0;
-
-		
-		function setY(value) {
-			y = value;
-		}
-
-		$: yDependent = y;
-		$: setY(x);
-
-		// Moving the line $: yDependent = y below $: setY(x)
-		// will cause yDependent to be updated when x is updated.
-
-	*/
-
 	import { onDestroy, onMount } from "svelte";
 	import * as THREE from "three";
 	import ThreeScene from "../lib/ThreeScene";
@@ -70,6 +12,7 @@
 	} from "../utils/ropes";
 	// import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 	import { cloneDeep } from "lodash";
+	import PlayerController from "../lib/PlayerController";
 
 	/** @type {HTMLVideoElement} */
 	let video;
@@ -97,6 +40,8 @@
 	let model_ready = false;
 
 	let poseDetector, poseDetectorAvailable;
+	/** @type {PlayerController} */
+	let playerController = undefined;
 
 	function animate() {
 		// update physics world and threejs renderer
@@ -157,22 +102,11 @@
 		]).then(([fbx, fbx0]) => {
 			// console.log(fbx, fbx0);
 
-			threeScene.scene.add(fbx);
+			// threeScene.scene.add(fbx);
+
+			playerController = new PlayerController(fbx0);
 
 			threeScene.scene.add(fbx0);
-
-			// // Create an AnimationMixer, and get the list of AnimationClip instances
-			// mixer = new THREE.AnimationMixer(fbx);
-
-			// // console.log(fbx.animations[0]);
-
-			// // const clip = THREE.AnimationClip.parse(anim);
-			// // const action = mixer.clipAction(clip);
-			// const action = mixer.clipAction(fbx.animations[0]);
-
-			// action.play();
-
-			// model_ready = true;
 
 			animate();
 		});
@@ -193,9 +127,12 @@
 		}
 
 		const pose3D = cloneDeep(result.worldLandmarks[0]);
-		const pose2D = cloneDeep(result.landmarks[0]);
+		// const pose2D = cloneDeep(result.landmarks[0]);
 
-		// boxerController.onPoseCallback(pose3D, pose2D, false);
+		if (playerController) {
+			// set rotation to limbs
+			playerController.applyPose2Bone(pose3D, true);
+		}
 
 		poseDetectorAvailable = true;
 	}
