@@ -431,8 +431,19 @@ export function loadGLTF(url) {
 
 export function loadFBX(url) {
 	return new Promise((resolve) => {
-		const loader = new FBXLoader();
-		loader.load(url, (fbx) => resolve(fbx));
+		const fbxLoader = new FBXLoader();
+		fbxLoader.load(
+			url,
+			(object) => {
+				resolve(object);
+			},
+			(xhr) => {
+				console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+			},
+			(error) => {
+				console.log(error);
+			}
+		);
 	});
 }
 
@@ -1503,8 +1514,8 @@ export function readBuffer(buffer) {
 /**
  * looping in a spiral, generate a array of points, that is grow in a spiral manner
  * https://www.baeldung.com/cs/looping-spiral
- * 
- * @param {number} radius 
+ *
+ * @param {number} radius
  * @returns {Array}
  */
 export function spiralArray(radius) {
@@ -1514,7 +1525,7 @@ export function spiralArray(radius) {
 	let dx = 0;
 	let dy = -1;
 
-	const arr = []
+	const arr = [];
 
 	for (let i = 0; i < radius ** 2; i++) {
 		if (
@@ -1523,7 +1534,7 @@ export function spiralArray(radius) {
 			-radius / 2 < y &&
 			y <= radius / 2
 		) {
-			arr.push([x, y])
+			arr.push([x, y]);
 		}
 
 		if (x === y || (x < 0 && x === -y) || (x > 0 && x === 1 - y)) {
@@ -1533,18 +1544,17 @@ export function spiralArray(radius) {
 		[x, y] = [x + dx, y + dy];
 	}
 
-	return arr
+	return arr;
 }
 
 /**
- * 
- * @param {number} num 
- * @returns 
+ *
+ * @param {number} num
+ * @returns
  */
 export function pad0(num) {
 	return ("00000000" + num).slice(-8);
 }
-
 
 /**
  * calf_l

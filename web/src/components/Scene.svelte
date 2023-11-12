@@ -79,6 +79,8 @@
 	let showVideo = false;
 	let animationPointer = 0;
 
+	let invokedCamera = false;
+
 	let capturePose = false;
 
 	/** @type {ThreeScene} */
@@ -142,8 +144,6 @@
 			document.body.appendChild(stats.dom);
 		}
 
-		invokeCamera(video, () => {});
-
 		createPoseLandmarker().then((pose) => {
 			poseDetector = pose;
 
@@ -198,6 +198,18 @@
 		// boxerController.onPoseCallback(pose3D, pose2D, false);
 
 		poseDetectorAvailable = true;
+	}
+
+	$: {
+		// when clicked capture pose, if the camera is not invoked, invoke it
+		// then the poseDetector will be available
+		if (capturePose === true && invokedCamera === false) {
+			invokedCamera = true;
+			invokeCamera(video, () => {
+				// theoritically, the poseDetector should be available now
+				// todo output a message tells posedetector is functional
+			});
+		}
 	}
 </script>
 
