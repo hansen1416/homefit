@@ -43,6 +43,8 @@ export default class PlayerController {
 			}
 		});
 
+		// console.log(this.bones);
+
 		this.mesh = model;
 		this.uuid = model.uuid;
 
