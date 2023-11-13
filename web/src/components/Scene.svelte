@@ -13,11 +13,16 @@
 	// import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 	import { cloneDeep } from "lodash";
 	import PlayerController from "../lib/PlayerController";
+	import { DrawingUtils, PoseLandmarker } from "@mediapipe/tasks-vision";
 
 	/** @type {HTMLVideoElement} */
 	let video;
 	/** @type {HTMLCanvasElement} */
 	let canvas;
+	/** @type {HTMLCanvasElement} */
+	let drawcanvas;
+	/** @type {CanvasRenderingContext2D} */
+	let drawcanvasCtx;
 
 	let showVideo = false;
 	let animationPointer = 0;
@@ -110,6 +115,10 @@
 
 			animate();
 		});
+
+		drawcanvasCtx = drawcanvas.getContext("2d");
+
+
 	});
 
 	/**
@@ -128,6 +137,19 @@
 
 		const pose3D = cloneDeep(result.worldLandmarks[0]);
 		// const pose2D = cloneDeep(result.landmarks[0]);
+
+		// console.log(pose3D)
+
+		// clear context first
+		drawcanvasCtx.clearRect(0, 0, drawcanvas.width, drawcanvas.height);
+		
+      const drawingUtils = new DrawingUtils(drawcanvasCtx);
+      for (const landmark of result.landmarks) {
+        drawingUtils.drawLandmarks(landmark, {
+          radius: (data) => DrawingUtils.lerp(data.from.z, -0.15, 0.1, 5, 1)
+        });
+        drawingUtils.drawConnectors(landmark, PoseLandmarker.POSE_CONNECTIONS);
+      }
 
 		if (playerController) {
 			// set rotation to limbs
@@ -153,6 +175,10 @@
 <!-- section is not needed, only for readablity -->
 <section>
 	<canvas bind:this={canvas} />
+
+	<canvas bind:this={drawcanvas} 
+	style="width: 480px; height: 360px; position: absolute; top: 0; right: 0"
+	/>
 
 	<video
 		bind:this={video}
