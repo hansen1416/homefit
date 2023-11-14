@@ -48,10 +48,7 @@
 		// update physics world and threejs renderer
 		threeScene.onFrameUpdate(stats);
 
-		if (
-			video &&
-			video.readyState >= 2
-		) {
+		if (video && video.readyState >= 2) {
 			poseDetector.send({ image: video });
 		}
 
@@ -117,14 +114,34 @@
 
 		// console.log(poseDetector);
 
-		poseDetector.onResults((results) => {
-			console.log(results);
+		poseDetector.onResults((result) => {
+			if (
+				!result ||
+				!result.poseLandmarks ||
+				!result.poseWorldLandmarks
+			) {
+				poseDetectorAvailable = true;
+				return;
+			}
+
+			const keypoints3D = cloneDeep(result.poseWorldLandmarks);
+
+			const width_ratio = 30;
+			const height_ratio = (width_ratio * 480) / 640;
+
+			// multiply x,y by differnt factor
+			for (let v of keypoints3D) {
+				v["x"] *= -width_ratio;
+				v["y"] *= -height_ratio;
+				v["z"] *= -width_ratio;
+			}
+
+			console.log(keypoints3D)
 
 			poseDetectorAvailable = true;
 		});
 
 		poseDetector.initialize().then(() => {
-
 			poseDetectorAvailable = true;
 
 			animate();
