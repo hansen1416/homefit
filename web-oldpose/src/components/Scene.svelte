@@ -2,15 +2,12 @@
 	import { onDestroy, onMount } from "svelte";
 	import * as THREE from "three";
 	import ThreeScene from "../lib/ThreeScene";
-	// import RapierWorld from "../lib/RapierWorld";
 	import Stats from "three/examples/jsm/libs/stats.module.js";
 	// import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 	import {
 		loadFBX,
-		// createPoseLandmarker,
 		invokeCamera,
 	} from "../utils/ropes";
-	// import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 	import { cloneDeep } from "lodash";
 	import PlayerController from "../lib/PlayerController";
 	import { Pose } from "@mediapipe/pose";
@@ -74,10 +71,6 @@
 		threeScene = new ThreeScene(canvas, sceneWidth, sceneHeight);
 
 		threeScene.scene.position.set(0, -100, 0);
-
-		// Promise.all([import("@dimforge/rapier3d")]).then(([RAPIER]) => {
-		// 	physicsWorld = new RapierWorld(RAPIER);
-		// });
 
 		if (import.meta.env.DEV) {
 			stats = new Stats();

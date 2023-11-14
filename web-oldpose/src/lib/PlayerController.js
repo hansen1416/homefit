@@ -43,7 +43,7 @@ export default class PlayerController {
 			}
 		});
 
-		// console.log(this.bones);
+		console.log(this.bones);
 
 		this.mesh = model;
 		this.uuid = model.uuid;
@@ -176,6 +176,8 @@ export default class PlayerController {
 				this.pose3d_mediapipe[this.joints_map["RIGHT_HIP"]]
 			)
 			.multiplyScalar(0.5);
+
+		// todo maybe core should be substraction?
 		const core = new THREE.Vector3()
 			.addVectors(left_oblique, right_oblique)
 			.multiplyScalar(0.5);
