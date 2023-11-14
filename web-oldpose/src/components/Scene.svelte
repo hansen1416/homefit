@@ -23,7 +23,7 @@
 	let showVideo = false;
 	let animationPointer = 0;
 
-	let invokedCamera = false;
+	let cameraInvoked = false;
 
 	let capturePose = false;
 
@@ -41,37 +41,28 @@
 	// let model_ready = false;
 
 	let poseDetector, poseDetectorAvailable;
-	// /** @type {PlayerController} */
-	// let playerController = undefined;
+	/** @type {PlayerController} */
+	let playerController = undefined;
+
+	let counter = 0;
 
 	function animate() {
 		// update physics world and threejs renderer
 		threeScene.onFrameUpdate(stats);
 
-		if (video && video.readyState >= 2) {
+		if (
+			counter % 3 === 0 &&
+			video &&
+			video.readyState >= 2 &&
+			poseDetectorAvailable &&
+			poseDetector
+		) {
+			poseDetectorAvailable = false;
+
 			poseDetector.send({ image: video });
 		}
 
-		// if (model_ready) {
-		// 	mixer.update(clock.getDelta());
-		// 	// console.log(1);
-		// }
-
-		// // ========= captured pose logic
-		// if (
-		// 	capturePose &&
-		// 	video &&
-		// 	video.readyState >= 2 &&
-		// 	poseDetectorAvailable &&
-		// 	poseDetector
-		// ) {
-		// 	poseDetectorAvailable = false;
-		// 	poseDetector.detectForVideo(
-		// 		video,
-		// 		performance.now(),
-		// 		onPoseCallback
-		// 	);
-		// }
+		counter += 1
 
 		animationPointer = requestAnimationFrame(animate);
 	}
@@ -94,7 +85,9 @@
 			document.body.appendChild(stats.dom);
 		}
 
-		invokeCamera(video, () => {});
+		invokeCamera(video, () => {
+			cameraInvoked = true;
+		});
 
 		poseDetector = new Pose({
 			locateFile: (file) => {
@@ -136,38 +129,35 @@
 				v["z"] *= -width_ratio;
 			}
 
-			console.log(keypoints3D)
+			// console.log(keypoints3D)
 
 			poseDetectorAvailable = true;
 		});
 
-		poseDetector.initialize().then(() => {
+		// poseDetector.initialize().then(() => {
+		// 	poseDetectorAvailable = true;
+
+		// 	animate();
+		// });
+
+		Promise.all([
+			loadFBX("mixamo2.fbx"),
+			loadFBX("mixamo0.fbx"),
+			poseDetector.initialize()
+		]).then(([fbx, fbx0, _]) => {
+			// console.log(fbx, fbx0);
+
+			// threeScene.scene.add(fbx);
+
+			playerController = new PlayerController(fbx0);
+
+			threeScene.scene.add(fbx0);
+
 			poseDetectorAvailable = true;
 
 			animate();
 		});
 
-		// createPoseLandmarker().then((pose) => {
-		// 	poseDetector = pose;
-
-		// 	poseDetectorAvailable = true;
-		// });
-
-		// Promise.all([
-		// 	loadFBX("mixamo2.fbx"),
-		// 	loadFBX("mixamo0.fbx"),
-		// 	// loadFBX("mixamo2.fbx"),
-		// ]).then(([fbx, fbx0]) => {
-		// 	// console.log(fbx, fbx0);
-
-		// 	// threeScene.scene.add(fbx);
-
-		// 	playerController = new PlayerController(fbx0);
-
-		// 	threeScene.scene.add(fbx0);
-
-		// 	animate();
-		// });
 	});
 
 	/**
@@ -269,12 +259,12 @@
 		right: 0;
 	}
 
-	.controls {
+	/* .controls {
 		position: absolute;
 		bottom: 0;
 		right: 0;
 		padding: 10px;
 		display: flex;
 		justify-content: space-between;
-	}
+	} */
 </style>
