@@ -124,6 +124,8 @@
 
 			// console.log(keypoints3D)
 
+			playerController.applyPose2Bone(keypoints3D, true)
+
 			poseDetectorAvailable = true;
 		});
 
