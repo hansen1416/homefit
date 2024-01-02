@@ -76,6 +76,10 @@
 		cancelAnimationFrame(animation_pointer);
 	});
 
+	/**
+	 *
+	 * @param {Array<{x: number, y: number, z: number, visibility: number}>} keypoints3D
+	 */
 	function poseCallback(keypoints3D) {
 		playerController.applyPose2Bone(keypoints3D, true);
 	}

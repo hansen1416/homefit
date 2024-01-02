@@ -68,6 +68,11 @@ export default class PlayerController {
 	};
 
 	/**
+	 * the position of these 3 joints are real position of the user in front of the camera
+	 * eg.
+	 * left_shoulder: _Vector3 {x: -5.438949018716812, y: 9.090009704232216, z: 4.032454490661621}
+	 * right_shoulder: _Vector3 {x: 4.430159032344818, y: 10.827043130993843, z: 2.75645412504673}
+	 * core: _Vector3 {x: -0.2822154387831688, y: 5.020033587352373, z: 1.701674242503941}
 	 *
 	 * @param {THREE.Vector3} left_shoulder
 	 * @param {THREE.Vector3} right_shoulder
@@ -77,7 +82,7 @@ export default class PlayerController {
 	#getChestQuaternion(left_shoulder, right_shoulder, core) {
 		// new basis of chest from pose data
 		const xaxis = new THREE.Vector3()
-			.subVectors(left_shoulder, right_shoulder)
+			.subVectors(right_shoulder, left_shoulder)
 			.normalize();
 
 		const y_tmp = new THREE.Vector3()
@@ -89,13 +94,13 @@ export default class PlayerController {
 			.normalize();
 
 		const yaxis = new THREE.Vector3()
-			.crossVectors(xaxis, zaxis)
+			.crossVectors(zaxis, xaxis)
 			.normalize();
 
 		// transfer origin basis of chest to target basis
 		const m0 = new THREE.Matrix4().makeBasis(
 			new THREE.Vector3(1, 0, 0),
-			new THREE.Vector3(0, -1, 0),
+			new THREE.Vector3(0, 1, 0),
 			new THREE.Vector3(0, 0, 1)
 		);
 
@@ -109,6 +114,11 @@ export default class PlayerController {
 	}
 
 	/**
+	 * the position of these 3 joints are real position of the user in front of the camera
+	 * eg.
+	 * _Vector3 {x: -2.8411057591438293, y: -0.21446174243465066, z: -0.6154307909309864}
+	 * _Vector3 {x: 2.759140133857727, y: 0.3627159632742405, z: 0.6565528549253941}
+	 * _Vector3 {x: -0.1843450963497162, y: 5.061126192449592, z: 1.4994440227746964}
 	 *
 	 * @param {THREE.Vector3} left_hip
 	 * @param {THREE.Vector3} right_hip
@@ -118,7 +128,7 @@ export default class PlayerController {
 	#getAbsQuaternion(left_hip, right_hip, core) {
 		// new basis of abdominal from pose data
 		const xaxis = new THREE.Vector3()
-			.subVectors(left_hip, right_hip)
+			.subVectors(right_hip, left_hip)
 			.normalize();
 
 		const y_tmp = new THREE.Vector3()
@@ -157,14 +167,15 @@ export default class PlayerController {
 			B = A2 * inverse of A1
 		*/
 
-		// if (
-		// 	(left_shoulder2.visibility && left_shoulder2.visibility < 0.5) ||
-		// 	(right_shoulder2.visibility && right_shoulder2.visibility < 0.5) ||
-		// 	(left_hip2.visibility && left_hip2.visibility < 0.5) ||
-		// 	(right_hip2.visibility && right_hip2.visibility < 0.5)
-		// ) {
-		// 	return [new THREE.Quaternion(), new THREE.Quaternion()];
-		// }
+		if (
+			this.pose3d_mediapipe[this.joints_map["LEFT_SHOULDER"]].visibility <
+				0.5 ||
+			this.pose3d_mediapipe[this.joints_map["RIGHT_SHOULDER"]] < 0.5 ||
+			this.pose3d_mediapipe[this.joints_map["LEFT_HIP"]] < 0.5 ||
+			this.pose3d_mediapipe[this.joints_map["RIGHT_HIP"]] < 0.5
+		) {
+			return [new THREE.Quaternion(), new THREE.Quaternion()];
+		}
 
 		const left_oblique = new THREE.Vector3()
 			.addVectors(
@@ -322,6 +333,8 @@ export default class PlayerController {
 			chest_local
 		);
 
+		return;
+
 		this.#rotateLimb(
 			"LeftArm",
 			"LeftShoulder",
@@ -413,20 +426,5 @@ export default class PlayerController {
 				// new THREE.Vector3(0, 0, 1)
 			);
 		}
-
-		const left_shoulder_pos = new THREE.Vector3();
-		const right_shoulder_pos = new THREE.Vector3();
-
-		this.bones[this.#prefixBoneName("LeftShoulder")].getWorldPosition(
-			left_shoulder_pos
-		);
-		this.bones[this.#prefixBoneName("RightShoulder")].getWorldPosition(
-			right_shoulder_pos
-		);
-
-		return new THREE.Vector3().subVectors(
-			right_shoulder_pos,
-			left_shoulder_pos
-		);
 	}
 }
