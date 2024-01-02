@@ -11,14 +11,9 @@
 	/** @type {HTMLCanvasElement} */
 	let canvas;
 
-	let showVideo = false;
-	let animationPointer = 0;
-
-	let cameraInvoked = false;
-
 	/** @type {ThreeScene} */
 	let threeScene;
-
+	/** @type {Stats} */
 	let stats;
 
 	/** @type {PoseDetector} */
@@ -27,6 +22,8 @@
 	let playerController = undefined;
 
 	let capture_pose = false;
+	let show_video = false;
+	let animation_pointer = 0;
 
 	function animate() {
 		// update physics world and threejs renderer
@@ -36,15 +33,16 @@
 			poseDetector.predict(video);
 		}
 
-		animationPointer = requestAnimationFrame(animate);
+		animation_pointer = requestAnimationFrame(animate);
 	}
 
 	onMount(() => {
-		const sceneWidth = document.documentElement.clientWidth;
-		const sceneHeight = document.documentElement.clientHeight;
-
-		threeScene = new ThreeScene(canvas, sceneWidth, sceneHeight);
-
+		threeScene = new ThreeScene(
+			canvas,
+			document.documentElement.clientWidth,
+			document.documentElement.clientHeight
+		);
+		// -100 is ground level
 		threeScene.scene.position.set(0, -100, 0);
 
 		if (import.meta.env.DEV) {
@@ -53,17 +51,13 @@
 			document.body.appendChild(stats.dom);
 		}
 
-		invokeCamera(video, () => {
-			cameraInvoked = true;
-		});
+		invokeCamera(video, () => {});
 
 		Promise.all([
 			loadFBX("fbx/mixamo2.fbx"),
 			loadFBX("fbx/mixamo0.fbx"),
 			poseDetector.init(poseCallback),
 		]).then(([fbx, fbx0, _]) => {
-			// console.log(fbx, fbx0);
-
 			// threeScene.scene.add(fbx);
 
 			playerController = new PlayerController(fbx0);
@@ -79,7 +73,7 @@
 	 * this is the only one that runs inside a server-side component.
 	 */
 	onDestroy(() => {
-		cancelAnimationFrame(animationPointer);
+		cancelAnimationFrame(animation_pointer);
 	});
 
 	function poseCallback(keypoints3D) {
@@ -96,7 +90,7 @@
 		autoPlay={true}
 		width={480 / 2}
 		height={360 / 2}
-		style="position: absolute; top:0; left: 0; display: {showVideo
+		style="position: absolute; top:0; left: 0; display: {show_video
 			? 'block'
 			: 'none'}"
 	>
@@ -111,16 +105,16 @@
 				}}>Reset Control</button
 			>
 			<!-- 
-			{#if showVideo}
+			{#if show_video}
 				<button
 					on:click={() => {
-						showVideo = !showVideo;
+						show_video = !show_video;
 					}}>hide video</button
 				>
 			{:else}
 				<button
 					on:click={() => {
-						showVideo = !showVideo;
+						show_video = !show_video;
 					}}>show video</button
 				>
 			{/if} -->
