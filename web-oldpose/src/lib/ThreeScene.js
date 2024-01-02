@@ -61,6 +61,8 @@ export default class ThreeScene {
 		// env light
 		this.scene.add(new THREE.AmbientLight(0xffffff, 0.1));
 
+		this.scene.background = new THREE.Color(0x001E62);
+
 		/**
 		// mimic the sun light. maybe update light position later
 		this.light = new THREE.PointLight(0xffffff, 0.7);
@@ -129,7 +131,7 @@ export default class ThreeScene {
 
 				this.scene.add(object);
 
-				console.log(object);
+				// console.log(object);
 
 				// Create an AnimationMixer, and get the list of AnimationClip instances
 				const mixer = new THREE.AnimationMixer(object);

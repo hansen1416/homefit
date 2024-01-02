@@ -1,16 +1,10 @@
 <script>
 	import { onDestroy, onMount } from "svelte";
-	import * as THREE from "three";
 	import ThreeScene from "../lib/ThreeScene";
 	import Stats from "three/examples/jsm/libs/stats.module.js";
-	// import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
-	import {
-		loadFBX,
-		invokeCamera,
-	} from "../utils/ropes";
-	import { cloneDeep } from "lodash";
+	import { loadFBX, invokeCamera } from "../utils/ropes";
 	import PlayerController from "../lib/PlayerController";
-	import { Pose } from "@mediapipe/pose";
+	import PoseDetector from "../lib/PoseDetector";
 
 	/** @type {HTMLVideoElement} */
 	let video;
@@ -22,44 +16,25 @@
 
 	let cameraInvoked = false;
 
-	let capturePose = false;
-
 	/** @type {ThreeScene} */
 	let threeScene;
-	// /** @type {RapierWorld} */
-	// let physicsWorld;
 
 	let stats;
 
-	// let mixer;
-
-	// const clock = new THREE.Clock();
-
-	// let model_ready = false;
-
-	let poseDetector, poseDetectorAvailable;
+	/** @type {PoseDetector} */
+	let poseDetector = new PoseDetector();
 	/** @type {PlayerController} */
 	let playerController = undefined;
 
-	let counter = 0;
+	let capture_pose = false;
 
 	function animate() {
 		// update physics world and threejs renderer
 		threeScene.onFrameUpdate(stats);
 
-		if (
-			counter % 3 === 0 &&
-			video &&
-			video.readyState >= 2 &&
-			poseDetectorAvailable &&
-			poseDetector
-		) {
-			poseDetectorAvailable = false;
-
-			poseDetector.send({ image: video });
+		if (capture_pose) {
+			poseDetector.predict(video);
 		}
-
-		counter += 1
 
 		animationPointer = requestAnimationFrame(animate);
 	}
@@ -82,63 +57,10 @@
 			cameraInvoked = true;
 		});
 
-		poseDetector = new Pose({
-			locateFile: (file) => {
-				return `/mediapipe/${file}`;
-				// return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
-			},
-		});
-
-		poseDetector.setOptions({
-			modelComplexity: 2,
-			smoothLandmarks: true,
-			enableSegmentation: false,
-			smoothSegmentation: false,
-			minDetectionConfidence: 0.5,
-			minTrackingConfidence: 0.5,
-		});
-
-		// console.log(poseDetector);
-
-		poseDetector.onResults((result) => {
-			if (
-				!result ||
-				!result.poseLandmarks ||
-				!result.poseWorldLandmarks
-			) {
-				poseDetectorAvailable = true;
-				return;
-			}
-
-			const keypoints3D = cloneDeep(result.poseWorldLandmarks);
-
-			const width_ratio = 30;
-			const height_ratio = (width_ratio * 480) / 640;
-
-			// multiply x,y by differnt factor
-			for (let v of keypoints3D) {
-				v["x"] *= -width_ratio;
-				v["y"] *= -height_ratio;
-				v["z"] *= -width_ratio;
-			}
-
-			// console.log(keypoints3D)
-
-			playerController.applyPose2Bone(keypoints3D, true)
-
-			poseDetectorAvailable = true;
-		});
-
-		// poseDetector.initialize().then(() => {
-		// 	poseDetectorAvailable = true;
-
-		// 	animate();
-		// });
-
 		Promise.all([
-			loadFBX("mixamo2.fbx"),
-			loadFBX("mixamo0.fbx"),
-			poseDetector.initialize()
+			loadFBX("fbx/mixamo2.fbx"),
+			loadFBX("fbx/mixamo0.fbx"),
+			poseDetector.init(poseCallback),
 		]).then(([fbx, fbx0, _]) => {
 			// console.log(fbx, fbx0);
 
@@ -148,11 +70,8 @@
 
 			threeScene.scene.add(fbx0);
 
-			poseDetectorAvailable = true;
-
 			animate();
 		});
-
 	});
 
 	/**
@@ -163,34 +82,9 @@
 		cancelAnimationFrame(animationPointer);
 	});
 
-	// function onPoseCallback(result) {
-	// 	if (!result || !result.worldLandmarks || !result.worldLandmarks[0]) {
-	// 		poseDetectorAvailable = true;
-	// 		return;
-	// 	}
-
-	// 	const pose3D = cloneDeep(result.worldLandmarks[0]);
-	// 	// const pose2D = cloneDeep(result.landmarks[0]);
-
-	// 	if (playerController) {
-	// 		// set rotation to limbs
-	// 		playerController.applyPose2Bone(pose3D, true);
-	// 	}
-
-	// 	poseDetectorAvailable = true;
-	// }
-
-	// $: {
-	// 	// when clicked capture pose, if the camera is not invoked, invoke it
-	// 	// then the poseDetector will be available
-	// 	if (capturePose === true && invokedCamera === false) {
-	// 		invokedCamera = true;
-	// 		invokeCamera(video, () => {
-	// 			// theoritically, the poseDetector should be available now
-	// 			// todo output a message tells posedetector is functional
-	// 		});
-	// 	}
-	// }
+	function poseCallback(keypoints3D) {
+		playerController.applyPose2Bone(keypoints3D, true);
+	}
 </script>
 
 <!-- section is not needed, only for readablity -->
@@ -209,14 +103,14 @@
 		<track label="English" kind="captions" default />
 	</video>
 
-	<!-- <div class="controls">
+	<div class="controls">
 		<div>
 			<button
 				on:click={() => {
 					threeScene.resetControl();
 				}}>Reset Control</button
 			>
-
+			<!-- 
 			{#if showVideo}
 				<button
 					on:click={() => {
@@ -229,18 +123,20 @@
 						showVideo = !showVideo;
 					}}>show video</button
 				>
-			{/if}
+			{/if} -->
 
 			<button
-				class={capturePose ? "active" : ""}
+				class={capture_pose ? "active" : ""}
 				on:click={() => {
-					capturePose = !capturePose;
-
-					// console.log(big_obj);
-				}}>Capture Pose</button
+					capture_pose = !capture_pose;
+				}}><img src="svg/camera.svg" alt="Play" /></button
 			>
+
+			<button on:click={() => {}}>
+				<img src="svg/play.svg" alt="Camera" />
+			</button>
 		</div>
-	</div> -->
+	</div>
 </section>
 
 <style>
@@ -254,12 +150,12 @@
 		right: 0;
 	}
 
-	/* .controls {
+	.controls {
 		position: absolute;
 		bottom: 0;
 		right: 0;
 		padding: 10px;
 		display: flex;
 		justify-content: space-between;
-	} */
+	}
 </style>

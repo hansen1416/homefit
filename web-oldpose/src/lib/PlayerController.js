@@ -43,9 +43,8 @@ export default class PlayerController {
 			}
 		});
 
-
 		for (const b in this.bones) {
-			console.log(this.bones[b].up);
+			// console.log(this.bones[b].up);
 		}
 
 		this.mesh = model;
@@ -214,8 +213,7 @@ export default class PlayerController {
 		parent_bone_name,
 		start_joint_name,
 		end_joint_name,
-		init_euler,
-		
+		init_euler
 	) {
 		// if (
 		// 	(this.pose3D[this.joints_map[start_joint_name]] &&
@@ -257,7 +255,7 @@ export default class PlayerController {
 		const init_quaternion = new THREE.Quaternion().setFromEuler(init_euler);
 
 		const up_vector = new THREE.Vector3(0, 1, 0);
-			
+
 		// this is the real human body rotation,
 		let local_quaternion_bio = new THREE.Quaternion().setFromUnitVectors(
 			up_vector,
@@ -329,7 +327,7 @@ export default class PlayerController {
 			"LeftShoulder",
 			"LEFT_SHOULDER",
 			"LEFT_ELBOW",
-			new THREE.Euler(0, 0, 0),
+			new THREE.Euler(0, 0, 0)
 			// new THREE.Vector3(0, 1, 0)
 		);
 
@@ -338,7 +336,7 @@ export default class PlayerController {
 			"LeftArm",
 			"LEFT_ELBOW",
 			"LEFT_WRIST",
-			new THREE.Euler(0, 0, 0),
+			new THREE.Euler(0, 0, 0)
 			// new THREE.Vector3(0, 1, 0)
 		);
 
@@ -347,7 +345,7 @@ export default class PlayerController {
 			"RightShoulder",
 			"RIGHT_SHOULDER",
 			"RIGHT_ELBOW",
-			new THREE.Euler(0, 0, 0),
+			new THREE.Euler(0, 0, 0)
 			// new THREE.Vector3(0, 1, 0)
 		);
 
@@ -356,7 +354,7 @@ export default class PlayerController {
 			"RightArm",
 			"RIGHT_ELBOW",
 			"RIGHT_WRIST",
-			new THREE.Euler(0, 0, 0),
+			new THREE.Euler(0, 0, 0)
 			// new THREE.Vector3(0, 1, 0)
 		);
 
@@ -366,7 +364,7 @@ export default class PlayerController {
 				"Hips",
 				"LEFT_HIP",
 				"LEFT_KNEE",
-				new THREE.Euler(0, 0, -3.14),
+				new THREE.Euler(0, 0, -3.14)
 				// new THREE.Vector3(0, -1, 0)
 			);
 
@@ -375,7 +373,7 @@ export default class PlayerController {
 				"LeftUpLeg",
 				"LEFT_HIP",
 				"LEFT_ANKLE",
-				new THREE.Euler(0, 0, 0),
+				new THREE.Euler(0, 0, 0)
 				// new THREE.Vector3(0, 1, 0)
 			);
 
@@ -384,7 +382,7 @@ export default class PlayerController {
 				"LeftLeg",
 				"LEFT_ANKLE",
 				"LEFT_FOOT_INDEX",
-				new THREE.Euler(1.035, 0, 0),
+				new THREE.Euler(1.035, 0, 0)
 				// new THREE.Vector3(0, 0, 1)
 			);
 
@@ -393,7 +391,7 @@ export default class PlayerController {
 				"Hips",
 				"RIGHT_HIP",
 				"RIGHT_KNEE",
-				new THREE.Euler(0, 0, 3.14),
+				new THREE.Euler(0, 0, 3.14)
 				// new THREE.Vector3(0, -1, 0)
 			);
 
@@ -402,7 +400,7 @@ export default class PlayerController {
 				"RightUpLeg",
 				"RIGHT_KNEE",
 				"RIGHT_ANKLE",
-				new THREE.Euler(0, 0, 0),
+				new THREE.Euler(0, 0, 0)
 				// new THREE.Vector3(0, 1, 0)
 			);
 
@@ -411,7 +409,7 @@ export default class PlayerController {
 				"RightLeg",
 				"RIGHT_ANKLE",
 				"RIGHT_FOOT_INDEX",
-				new THREE.Euler(1.035, 0, 0),
+				new THREE.Euler(1.035, 0, 0)
 				// new THREE.Vector3(0, 0, 1)
 			);
 		}
