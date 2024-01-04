@@ -9,13 +9,13 @@
 	$websocket = socket; // Assign the instance to the store
 
 	// Connect to the websocket
-	socket.connect({ url: 'ws://localhost:3333' });
+	socket.connect('ws://localhost:3333/ws');
 
 	// Send messages or receive events
 	socket.sendMessage('Hello, server!');
-	socket.on('message', (event) => {
-		console.log(event.data);
-	});
+	// socket.on('message', (event) => {
+	// 	console.log(event.data);
+	// });
 
 </script>
 
