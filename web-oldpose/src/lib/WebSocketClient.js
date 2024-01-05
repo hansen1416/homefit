@@ -9,6 +9,19 @@ export default class WebSocketClient {
 	connect(url) {
 		this.socket = new WebSocket(url);
 
+		// Set the binaryType property to send binary data
+		this.socket.binaryType = "arraybuffer";
+
+		// Function to send a ping message
+		// keep the connection alive, 
+		function sendPing() {
+			const pingData = new ArrayBuffer(0); // Empty payload
+			this.socket.send(pingData);
+		}
+
+		// Example: Send a ping every 10 seconds
+		setInterval(sendPing, 10000);
+
 		this.socket.onopen = () => {
 			console.log("WebSocket connected!");
 		};
