@@ -226,16 +226,16 @@ export default class PlayerController {
 		end_joint_name,
 		init_euler
 	) {
-		// if (
-		// 	(this.pose3D[this.joints_map[start_joint_name]] &&
-		// 		this.pose3D[this.joints_map[start_joint_name]]
-		// 			.visibility < 0.5) ||
-		// 	(this.pose3D[this.joints_map[end_joint_name]] &&
-		// 		this.pose3D[this.joints_map[end_joint_name]]
-		// 			.visibility < 0.5)
-		// ) {
-		// 	return;
-		// }
+		if (
+			(this.pose3d_mediapipe[this.joints_map[start_joint_name]] &&
+				this.pose3d_mediapipe[this.joints_map[start_joint_name]]
+					.visibility < 0.5) ||
+			(this.pose3d_mediapipe[this.joints_map[end_joint_name]] &&
+				this.pose3d_mediapipe[this.joints_map[end_joint_name]]
+					.visibility < 0.5)
+		) {
+			return;
+		}
 
 		const start_joint =
 			this.pose3d_mediapipe[this.joints_map[start_joint_name]];
@@ -333,29 +333,9 @@ export default class PlayerController {
 			chest_local
 		);
 
-		return;
-
 		this.#rotateLimb(
 			"LeftArm",
 			"LeftShoulder",
-			"LEFT_SHOULDER",
-			"LEFT_ELBOW",
-			new THREE.Euler(0, 0, 0)
-			// new THREE.Vector3(0, 1, 0)
-		);
-
-		this.#rotateLimb(
-			"LeftForeArm",
-			"LeftArm",
-			"LEFT_ELBOW",
-			"LEFT_WRIST",
-			new THREE.Euler(0, 0, 0)
-			// new THREE.Vector3(0, 1, 0)
-		);
-
-		this.#rotateLimb(
-			"RightArm",
-			"RightShoulder",
 			"RIGHT_SHOULDER",
 			"RIGHT_ELBOW",
 			new THREE.Euler(0, 0, 0)
@@ -363,10 +343,28 @@ export default class PlayerController {
 		);
 
 		this.#rotateLimb(
-			"RightForeArm",
-			"RightArm",
+			"LeftForeArm",
+			"LeftArm",
 			"RIGHT_ELBOW",
 			"RIGHT_WRIST",
+			new THREE.Euler(0, 0, 0)
+			// new THREE.Vector3(0, 1, 0)
+		);
+
+		this.#rotateLimb(
+			"RightArm",
+			"RightShoulder",
+			"LEFT_SHOULDER",
+			"LEFT_ELBOW",
+			new THREE.Euler(0, 0, 0)
+			// new THREE.Vector3(0, 1, 0)
+		);
+
+		this.#rotateLimb(
+			"RightForeArm",
+			"RightArm",
+			"LEFT_ELBOW",
+			"LEFT_WRIST",
 			new THREE.Euler(0, 0, 0)
 			// new THREE.Vector3(0, 1, 0)
 		);
@@ -375,56 +373,56 @@ export default class PlayerController {
 			this.#rotateLimb(
 				"LeftUpLeg",
 				"Hips",
-				"LEFT_HIP",
-				"LEFT_KNEE",
-				new THREE.Euler(0, 0, -3.14)
+				"RIGHT_HIP",
+				"RIGHT_KNEE",
+				new THREE.Euler(0, 0, 0)
 				// new THREE.Vector3(0, -1, 0)
 			);
 
 			this.#rotateLimb(
 				"LeftLeg",
 				"LeftUpLeg",
-				"LEFT_HIP",
-				"LEFT_ANKLE",
+				"RIGHT_KNEE",
+				"RIGHT_ANKLE",
 				new THREE.Euler(0, 0, 0)
 				// new THREE.Vector3(0, 1, 0)
 			);
 
-			this.#rotateLimb(
-				"LeftFoot",
-				"LeftLeg",
-				"LEFT_ANKLE",
-				"LEFT_FOOT_INDEX",
-				new THREE.Euler(1.035, 0, 0)
-				// new THREE.Vector3(0, 0, 1)
-			);
+			// this.#rotateLimb(
+			// 	"LeftFoot",
+			// 	"LeftLeg",
+			// 	"RIGHT_ANKLE",
+			// 	"RIGHT_FOOT_INDEX",
+			// 	new THREE.Euler(0, 0, 0)
+			// 	// new THREE.Vector3(0, 0, 1)
+			// );
 
 			this.#rotateLimb(
 				"RightUpLeg",
 				"Hips",
-				"RIGHT_HIP",
-				"RIGHT_KNEE",
-				new THREE.Euler(0, 0, 3.14)
+				"LEFT_HIP",
+				"LEFT_KNEE",
+				new THREE.Euler(0, 0, 0)
 				// new THREE.Vector3(0, -1, 0)
 			);
 
 			this.#rotateLimb(
 				"RightLeg",
 				"RightUpLeg",
-				"RIGHT_KNEE",
-				"RIGHT_ANKLE",
+				"LEFT_KNEE",
+				"LEFT_ANKLE",
 				new THREE.Euler(0, 0, 0)
 				// new THREE.Vector3(0, 1, 0)
 			);
 
-			this.#rotateLimb(
-				"RightFoot",
-				"RightLeg",
-				"RIGHT_ANKLE",
-				"RIGHT_FOOT_INDEX",
-				new THREE.Euler(1.035, 0, 0)
-				// new THREE.Vector3(0, 0, 1)
-			);
+			// this.#rotateLimb(
+			// 	"RightFoot",
+			// 	"RightLeg",
+			// 	"LEFT_ANKLE",
+			// 	"LEFT_FOOT_INDEX",
+			// 	new THREE.Euler(0, 0, 0)
+			// 	// new THREE.Vector3(0, 0, 1)
+			// );
 		}
 	}
 }
