@@ -24,7 +24,7 @@
 
 	$: watch(websocket_state, ($websocket_state) => {
 		if ($websocket_state === WebSocket.OPEN) {
-			wsClient.sendMessage("redis:greeting");
+			wsClient.sendMessage("redis://greeting");
 		}
 	});
 </script>

@@ -30,7 +30,7 @@ fn main() {
 
     info!("Logger is ready!");
 
-    let file_path = Path::new("data/yoga1.json");
+    let file_path = Path::new("data/greeting.json");
 
     let contents = fs::read_to_string(file_path).expect("Should have been able to read the file");
 

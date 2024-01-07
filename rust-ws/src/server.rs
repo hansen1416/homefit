@@ -1,5 +1,5 @@
 use std::time::{ Duration, Instant };
-
+use redis::Commands;
 use actix::prelude::*;
 use actix_web_actors::ws;
 
@@ -85,14 +85,14 @@ impl Actor for MyWebSocket {
     fn started(&mut self, ctx: &mut Self::Context) {
         self.hb(ctx);
 
-        if false {
-            // Establish Redis connection here
-            let client = redis::Client::open("redis://localhost:6379").unwrap();
-            let con = client.get_connection().unwrap();
+        // Establish Redis connection here
+        let client = redis::Client
+            ::open("redis://localhost:6379")
+            .expect("Failed to connect to Redis");
+        let con = client.get_connection().expect("Failed to get Redis connection");
 
-            // Store the connection in a field for later use
-            self.redis_con = Some(con);
-        }
+        // Store the connection in a field for later use
+        self.redis_con = Some(con);
     }
 }
 
@@ -112,17 +112,32 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWebSocket {
             }
             Ok(ws::Message::Text(text)) => {
                 // Trigger file chunk sending based on a text message (replace with your trigger)
-                if false {
-                    // Access the Redis connection
-                    let con = self.redis_con.as_ref().unwrap();
+
+                // Access the Redis connection
+
+                const REDIS_PREFIX: &str = "redis://";
+
+                if text.starts_with(REDIS_PREFIX) {
+                    let redis_key = &text[REDIS_PREFIX.len()..];
+
+                    if let Some(con) = &mut self.redis_con {
+                        // Perform Redis operations as needed
+                        let value: String = con.get(&redis_key).unwrap();
+
+                        println!(
+                            "received text size {} from redis key {}",
+                            value.as_bytes().len(),
+                            redis_key
+                        );
+                    } else {
+                        // Handle the case where the connection is not established
+                        println!("Redis connection not available");
+                    }
+
+                    // ctx.text(text);
+                } else {
+                    println!("received text {}", text)
                 }
-
-                println!("received text {}", text)
-
-                // Perform Redis operations as needed
-                // let value: String = con.get("some_key").unwrap();
-
-                // ctx.text(text);
             }
             Ok(ws::Message::Binary(bin)) => ctx.binary(bin),
             Ok(ws::Message::Close(reason)) => {
