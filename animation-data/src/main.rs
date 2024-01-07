@@ -23,6 +23,9 @@ struct TrackItem {
 }
 
 fn main() {
+    /**
+    read json data from file, and save it to Redis
+    */
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("debug"));
 
     info!("Logger is ready!");

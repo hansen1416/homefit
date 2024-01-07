@@ -2,7 +2,7 @@
 	import { onDestroy, onMount } from "svelte";
 	import ThreeScene from "../lib/ThreeScene";
 	import Stats from "three/examples/jsm/libs/stats.module.js";
-	import { loadFBX, invokeCamera } from "../utils/ropes";
+	import { invokeCamera } from "../utils/ropes";
 	import PlayerController from "../lib/PlayerController";
 	import PoseDetector from "../lib/PoseDetector";
 
@@ -24,6 +24,8 @@
 	let capture_pose = false;
 	let show_video = false;
 	let animation_pointer = 0;
+
+	export let diva;
 
 	function animate() {
 		// update physics world and threejs renderer
@@ -53,19 +55,19 @@
 
 		invokeCamera(video, () => {});
 
-		Promise.all([
-			loadFBX("fbx/mixamo2.fbx"),
-			loadFBX("fbx/mixamo0.fbx"),
-			poseDetector.init(poseCallback),
-		]).then(([fbx, fbx0, _]) => {
-			// threeScene.scene.add(fbx);
+		// Promise.all([
+		// 	loadFBX("fbx/mixamo2.fbx"),
+		// 	loadFBX("fbx/mixamo0.fbx"),
+		// 	poseDetector.init(poseCallback),
+		// ]).then(([fbx, fbx0, _]) => {
+		// 	playerController = new PlayerController(fbx0);
 
-			playerController = new PlayerController(fbx0);
+		// 	threeScene.scene.add(fbx0);
 
-			threeScene.scene.add(fbx0);
+		// 	animate();
+		// });
 
-			animate();
-		});
+		animate();
 	});
 
 	/**
@@ -81,7 +83,15 @@
 	 * @param {Array<{x: number, y: number, z: number, visibility: number}>} keypoints3D
 	 */
 	function poseCallback(keypoints3D) {
-		playerController.applyPose2Bone(keypoints3D, true);
+		if (playerController) {
+			playerController.applyPose2Bone(keypoints3D, true);
+		}
+	}
+
+	$: if (diva) {
+		playerController = new PlayerController(diva);
+
+		threeScene.scene.add(diva);
 	}
 </script>
 
