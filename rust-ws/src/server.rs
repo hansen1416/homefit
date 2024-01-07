@@ -85,12 +85,14 @@ impl Actor for MyWebSocket {
     fn started(&mut self, ctx: &mut Self::Context) {
         self.hb(ctx);
 
-        // Establish Redis connection here
-        let client = redis::Client::open("redis://localhost:6379").unwrap();
-        let con = client.get_connection().unwrap();
+        if false {
+            // Establish Redis connection here
+            let client = redis::Client::open("redis://localhost:6379").unwrap();
+            let con = client.get_connection().unwrap();
 
-        // Store the connection in a field for later use
-        self.redis_con = Some(con);
+            // Store the connection in a field for later use
+            self.redis_con = Some(con);
+        }
     }
 }
 
@@ -110,9 +112,10 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWebSocket {
             }
             Ok(ws::Message::Text(text)) => {
                 // Trigger file chunk sending based on a text message (replace with your trigger)
-
-                // Access the Redis connection
-                let con = self.redis_con.as_ref().unwrap();
+                if false {
+                    // Access the Redis connection
+                    let con = self.redis_con.as_ref().unwrap();
+                }
 
                 // Perform Redis operations as needed
                 // let value: String = con.get("some_key").unwrap();

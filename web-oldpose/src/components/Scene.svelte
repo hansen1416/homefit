@@ -147,13 +147,4 @@
 		bottom: 0;
 		right: 0;
 	}
-
-	.controls {
-		position: absolute;
-		bottom: 0;
-		right: 0;
-		padding: 10px;
-		display: flex;
-		justify-content: space-between;
-	}
 </style>
