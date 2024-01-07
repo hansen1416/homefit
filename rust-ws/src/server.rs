@@ -117,6 +117,8 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWebSocket {
                     let con = self.redis_con.as_ref().unwrap();
                 }
 
+                println!("received text {}", text)
+
                 // Perform Redis operations as needed
                 // let value: String = con.get("some_key").unwrap();
 

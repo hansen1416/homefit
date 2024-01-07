@@ -1,6 +1,7 @@
 export default class WebSocketClient {
 	constructor() {
 		this.socket = null;
+		this.onConnect = () => {};
 		this.onMessage = () => {}; // Define empty default event handlers
 		this.onError = () => {};
 		this.onClose = () => {};
@@ -21,7 +22,7 @@ export default class WebSocketClient {
 		}, 10000);
 
 		this.socket.onopen = () => {
-			console.log("WebSocket connected!");
+			this.onConnect(this.socket.readyState); // Call user-defined onConnect handler
 		};
 
 		this.socket.onmessage = (event) => {

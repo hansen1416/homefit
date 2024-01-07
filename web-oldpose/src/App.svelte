@@ -1,6 +1,6 @@
 <script>
 	import { Router, Route } from "svelte-routing";
-	import { websocket } from "./store/websocketStore";
+	import { websocket, websocket_state } from "./store/websocketStore";
 	import WebSocketClient from "./lib/WebSocketClient";
 	import Home from "./routes/Home.svelte";
 	import ExtractAnimationData from "./routes/ExtractAnimationData.svelte";
@@ -12,11 +12,9 @@
 	// Connect to the websocket
 	socket.connect("ws://localhost:3333/ws");
 
-	// Send messages or receive events
-	// socket.sendMessage("Hello, server!");
-	// socket.on('message', (event) => {
-	// 	console.log(event.data);
-	// });
+	socket.onConnect = (state) => {
+		$websocket_state = state;
+	};
 </script>
 
 <Router>
