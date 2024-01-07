@@ -22,6 +22,7 @@
 	let playerController = undefined;
 
 	let capture_pose = false;
+	let detector_ready = false;
 	let show_video = false;
 	let animation_pointer = 0;
 
@@ -31,7 +32,7 @@
 		// update physics world and threejs renderer
 		threeScene.onFrameUpdate(stats);
 
-		if (capture_pose) {
+		if (detector_ready && capture_pose) {
 			poseDetector.predict(video);
 		}
 
@@ -52,20 +53,12 @@
 			stats.showPanel(1);
 			document.body.appendChild(stats.dom);
 		}
-
+		// initialize camera
 		invokeCamera(video, () => {});
-
-		// Promise.all([
-		// 	loadFBX("fbx/mixamo2.fbx"),
-		// 	loadFBX("fbx/mixamo0.fbx"),
-		// 	poseDetector.init(poseCallback),
-		// ]).then(([fbx, fbx0, _]) => {
-		// 	playerController = new PlayerController(fbx0);
-
-		// 	threeScene.scene.add(fbx0);
-
-		// 	animate();
-		// });
+		// initialize pose detector
+		Promise.all([poseDetector.init(poseCallback)]).then(([_]) => {
+			detector_ready = true;
+		});
 
 		animate();
 	});
@@ -88,7 +81,7 @@
 		}
 	}
 
-	$: if (diva) {
+	$: if (typeof diva === "object" && diva.isObject3D === true) {
 		playerController = new PlayerController(diva);
 
 		threeScene.scene.add(diva);
