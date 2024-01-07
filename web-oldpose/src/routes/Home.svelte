@@ -6,12 +6,12 @@
 	let diva;
 
 	onMount(() => {
-		Promise.all([loadFBX("fbx/mixamo0.fbx")]).then(([fbx]) => {
-			diva = fbx;
+		Promise.all([loadFBX("fbx/mixamo0.fbx")]).then(([fbx0]) => {
+			diva = fbx0;
 		});
 	});
 
 	onDestroy(() => {});
 </script>
 
-<Scene {diva} />
+<Scene {diva} shadow={undefined} />

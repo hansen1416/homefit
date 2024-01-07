@@ -26,13 +26,17 @@
 	let show_video = false;
 	let animation_pointer = 0;
 
+	// diva is the main character, play standard animation
 	export let diva;
+	// shaow is user pose projection
+	export let shadow;
 
 	function animate() {
 		// update physics world and threejs renderer
 		threeScene.onFrameUpdate(stats);
 
 		if (detector_ready && capture_pose) {
+			// todo try to run prediction asynchrously
 			poseDetector.predict(video);
 		}
 
@@ -82,9 +86,13 @@
 	}
 
 	$: if (typeof diva === "object" && diva.isObject3D === true) {
-		playerController = new PlayerController(diva);
-
 		threeScene.scene.add(diva);
+	}
+
+	$: if (typeof shadow === "object" && shadow.isObject3D === true) {
+		playerController = new PlayerController(shadow);
+
+		threeScene.scene.add(shadow);
 	}
 </script>
 

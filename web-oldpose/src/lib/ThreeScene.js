@@ -3,7 +3,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 
 export const SceneProperties = {
-	camera_height: 0,
+	camera_height: 60,
 	camera_far_z: 200,
 };
 
@@ -61,7 +61,7 @@ export default class ThreeScene {
 		// env light
 		this.scene.add(new THREE.AmbientLight(0xffffff, 0.1));
 
-		this.scene.background = new THREE.Color(0x001E62);
+		this.scene.background = new THREE.Color(0x001e62);
 
 		/**
 		// mimic the sun light. maybe update light position later

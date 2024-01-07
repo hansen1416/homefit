@@ -89,7 +89,7 @@ export default class PoseDetector {
 			console.error("Video is not ready");
 		}
 
-		if (this.#counter % 3 === 0) {
+		if (this.#counter % 6 === 0) {
 			this.#detector_available = false;
 
 			this.#detector.send({ image: video });
