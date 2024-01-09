@@ -1,10 +1,14 @@
 <script>
 	import { onDestroy, onMount } from "svelte";
+	import * as THREE from "three";
 	import ThreeScene from "../lib/ThreeScene";
 	import Stats from "three/examples/jsm/libs/stats.module.js";
 	import { invokeCamera } from "../utils/ropes";
 	import PlayerController from "../lib/PlayerController";
 	import PoseDetector from "../lib/PoseDetector";
+	import animation_queue from "../store/timelineStore";
+	import { watch } from "../store/watch";
+	import _ from "lodash";
 
 	/** @type {HTMLVideoElement} */
 	let video;
@@ -30,6 +34,9 @@
 	export let diva;
 	// shaow is user pose projection
 	export let shadow;
+
+	/** @type {THREE.AnimationMixer} */
+	let diva_mixer;
 
 	function animate() {
 		// update physics world and threejs renderer
@@ -86,14 +93,35 @@
 	}
 
 	$: if (typeof diva === "object" && diva.isObject3D === true) {
-		threeScene.scene.add(diva);
+		// threeScene.scene.add(diva);
+
+		diva_mixer = new THREE.AnimationMixer(diva);
+
+		diva_mixer.addEventListener("finished", () => {
+			$animation_queue = _.tail($animation_queue);
+		});
 	}
 
 	$: if (typeof shadow === "object" && shadow.isObject3D === true) {
-		playerController = new PlayerController(shadow);
-
-		threeScene.scene.add(shadow);
+		// playerController = new PlayerController(shadow);
+		// threeScene.scene.add(shadow);
 	}
+
+	/**
+	 * watch animation_queue, when it changes,
+	 * check whether animation in play
+	 * if no, play the first animation
+	 * if yes, do nothing
+	 *
+	 *
+	 * use mixer finished events, when finished, pop the first animation from queue
+	 *
+	 *
+	 */
+
+	$: watch(animation_queue, ($animation_queue) => {
+		console.log($animation_queue);
+	});
 </script>
 
 <!-- section is not needed, only for readablity -->

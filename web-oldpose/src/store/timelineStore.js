@@ -1,6 +1,6 @@
-import { writable } from 'svelte/store';
+import { writable } from "svelte/store";
 
 // Initialize with an empty array
-const timeline = writable([]);
+const animation_queue = writable([]);
 
-export default timeline;
+export default animation_queue;
