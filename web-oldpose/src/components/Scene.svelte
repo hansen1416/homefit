@@ -96,7 +96,7 @@
 	}
 
 	$: if (typeof diva === "object" && diva.isObject3D === true) {
-		// threeScene.scene.add(diva);
+		threeScene.scene.add(diva);
 
 		diva_mixer = new THREE.AnimationMixer(diva);
 
@@ -108,8 +108,8 @@
 	}
 
 	$: if (typeof shadow === "object" && shadow.isObject3D === true) {
-		// playerController = new PlayerController(shadow);
-		// threeScene.scene.add(shadow);
+		playerController = new PlayerController(shadow);
+		threeScene.scene.add(shadow);
 	}
 
 	/**
@@ -137,18 +137,25 @@
 
 		diva_mixer.stopAllAction();
 
-		// play the first animation in queue, the animation_data should be prepared before hand
-		diva_action = diva_mixer.clipAction(animation_data[animation_name]);
+		console.log(animation_data[animation_name])
+		console.log(typeof animation_data[animation_name])
 
-		action.reset();
-		action.setLoop(THREE.LoopOnce, animation_repeat);
+		// play the first animation in queue, the animation_data should be prepared before hand
+		diva_action = diva_mixer.clipAction(
+			THREE.AnimationClip.parse(animation_data[animation_name])
+		);
+
+		console.log(diva_action, animation_data);
+
+		diva_action.reset();
+		diva_action.setLoop(THREE.LoopOnce, animation_repeat);
 
 		// keep model at the position where it stops
-		action.clampWhenFinished = false;
+		diva_action.clampWhenFinished = false;
 
-		action.enable = true;
+		diva_action.enabled = true;
 
-		action.play();
+		diva_action.play();
 	});
 </script>
 

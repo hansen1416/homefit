@@ -124,24 +124,16 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWebSocket {
 
                     if let Some(con) = &mut self.redis_con {
                         for animation_name in animation_names {
+                            println!("animation name: {}", animation_name);
+
                             // Access and use each part here
                             // Perform Redis operations as needed
                             let value: String = con.get(&animation_name).unwrap();
 
-                            println!(
-                                "received text size {} from redis key {}",
-                                value.as_bytes().len(),
-                                animation_name
-                            );
+                            println!("fetched data from redis, size {}", value.as_bytes().len());
 
                             // Concatenation here:
                             let message = format!("{}::{}", animation_name, value);
-
-                            println!(
-                                "Sending text size {} to websocket: {}",
-                                message.as_bytes().len(),
-                                message
-                            );
 
                             ctx.text(message); // Send the concatenated message
                         }
