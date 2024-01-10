@@ -120,21 +120,35 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWebSocket {
                 if text.starts_with(REDIS_PREFIX) {
                     let redis_key = &text[REDIS_PREFIX.len()..];
 
-                    if let Some(con) = &mut self.redis_con {
-                        // Perform Redis operations as needed
-                        let value: String = con.get(&redis_key).unwrap();
+                    let animation_names: Vec<&str> = redis_key.split(",").collect();
 
-                        println!(
-                            "received text size {} from redis key {}",
-                            value.as_bytes().len(),
-                            redis_key
-                        );
+                    if let Some(con) = &mut self.redis_con {
+                        for animation_name in animation_names {
+                            // Access and use each part here
+                            // Perform Redis operations as needed
+                            let value: String = con.get(&animation_name).unwrap();
+
+                            println!(
+                                "received text size {} from redis key {}",
+                                value.as_bytes().len(),
+                                animation_name
+                            );
+
+                            // Concatenation here:
+                            let message = format!("{}::{}", animation_name, value);
+
+                            println!(
+                                "Sending text size {} to websocket: {}",
+                                message.as_bytes().len(),
+                                message
+                            );
+
+                            ctx.text(message); // Send the concatenated message
+                        }
                     } else {
                         // Handle the case where the connection is not established
                         println!("Redis connection not available");
                     }
-
-                    // ctx.text(text);
                 } else {
                     println!("received text {}", text)
                 }

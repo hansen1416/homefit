@@ -7,6 +7,7 @@
 	import PlayerController from "../lib/PlayerController";
 	import PoseDetector from "../lib/PoseDetector";
 	import animation_queue from "../store/timelineStore";
+	import animation_data from "../store/animationDataStore";
 	import { watch } from "../store/watch";
 	import _ from "lodash";
 
@@ -37,6 +38,8 @@
 
 	/** @type {THREE.AnimationMixer} */
 	let diva_mixer;
+	/** @type {THREE.AnimationAction} */
+	let diva_action;
 
 	function animate() {
 		// update physics world and threejs renderer
@@ -98,6 +101,8 @@
 		diva_mixer = new THREE.AnimationMixer(diva);
 
 		diva_mixer.addEventListener("finished", () => {
+			// when one animation finished, remove the first animation from queue
+			// this will trigger the watch function on `$animation_queue` below
 			$animation_queue = _.tail($animation_queue);
 		});
 	}
@@ -112,15 +117,35 @@
 	 * check whether animation in play
 	 * if no, play the first animation
 	 * if yes, do nothing
-	 *
-	 *
-	 * use mixer finished events, when finished, pop the first animation from queue
-	 *
-	 *
 	 */
-
 	$: watch(animation_queue, ($animation_queue) => {
-		console.log($animation_queue);
+		// no animation in queue, do nothing
+		if ($animation_queue.length === 0) {
+			return;
+		}
+		// another animation is playing, do nothing
+		if (diva_action && diva_action.isRunning()) {
+			return;
+		}
+		// diva is not ready, do nothing
+		if (!diva_mixer) {
+			return;
+		}
+
+		diva_mixer.stopAllAction();
+
+		// play the first animation in queue, the animation_data should be prepared before hand
+		diva_action = diva_mixer.clipAction(animation_data[$animation_queue[0]]);
+
+		action.reset();
+		action.setLoop(THREE.LoopOnce);
+
+		// keep model at the position where it stops
+		action.clampWhenFinished = false;
+
+		action.enable = true;
+
+		action.play();
 	});
 </script>
 

@@ -5,11 +5,11 @@
 	import { websocket, websocket_state } from "../store/websocketStore";
 	import { watch } from "../store/watch.js";
 	import animation_queue from "../store/timelineStore";
-
+	import animation_data from "../store/animationDataStore";
+	import _ from "lodash";
 
 	let diva;
 	let wsClient;
-
 
 	onMount(() => {
 		Promise.all([loadFBX("fbx/mixamo0.fbx")]).then(([fbx0]) => {
@@ -19,26 +19,33 @@
 
 			wsClient.onMessage = (msg) => {
 				console.log(msg);
+
+				// get animation data from redis
+				// where in format like name::data
+				// update animation_data
+
+				// first split the message
+				let [name, data] = msg.split("::");
+				animation_data[name] = data;
+
+				queue = _.cloneDeep($animation_queue);
+
+				queue.push(name);
+
+				// update animation_queue
+				$animation_queue = queue;
 			};
 		});
-
-
-		setInterval(() => {
-			// add a random string
-			// timeline.add(Math.random().toString(36).substring(7));
-			$animation_queue = [Math.random().toString(36).substring(7)];
-		}, 3000)
 	});
 
 	onDestroy(() => {});
 
 	$: watch(websocket_state, ($websocket_state) => {
 		if ($websocket_state === WebSocket.OPEN) {
-			wsClient.sendMessage("redis://greeting");
+			// when websocket is connected, request the animation data needed in this component
+			wsClient.sendMessage("redis://greeting,grumpy");
 		}
 	});
-
-
 </script>
 
 <Scene {diva} shadow={undefined} />
