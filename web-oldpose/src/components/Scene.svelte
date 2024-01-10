@@ -132,13 +132,16 @@
 			return;
 		}
 
+		const animation_name = $animation_queue[0].name;
+		const animation_repeat = $animation_queue[0].repeat;
+
 		diva_mixer.stopAllAction();
 
 		// play the first animation in queue, the animation_data should be prepared before hand
-		diva_action = diva_mixer.clipAction(animation_data[$animation_queue[0]]);
+		diva_action = diva_mixer.clipAction(animation_data[animation_name]);
 
 		action.reset();
-		action.setLoop(THREE.LoopOnce);
+		action.setLoop(THREE.LoopOnce, animation_repeat);
 
 		// keep model at the position where it stops
 		action.clampWhenFinished = false;
