@@ -2,13 +2,23 @@
 name = "animation-data"
 version = "0.1.0"
 edition = "2021"
+default-run = "save-data"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "save-data"
+path = "src/main.rs"
+
+
+[[bin]]
+name = "test"
+path = "src/test.rs"
+
 
 [dependencies]
 env_logger = "^0.9.0"
 log = "^0.4.0"
-
 # The core APIs, including the Serialize and Deserialize traits. Always
 # required when using Serde. The "derive" feature is only required when
 # using #[derive(Serialize, Deserialize)] to make Serde work with structs

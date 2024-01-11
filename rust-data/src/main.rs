@@ -1,19 +1,18 @@
 use log::{ info };
 use std::fs;
 use std::path::Path;
-use serde::Deserialize;
+// use serde::Deserialize;
 use serde_json;
 use redis::{ Client, Commands };
 
-
-#[derive(Deserialize)]
-struct Animation {
-    // blendMode: i32,
-    // duration: f64,
-    name: String,
-    // tracks: Vec<TrackItem>, // Array of TrackItem structs
-    // uuid: String,
-}
+// #[derive(Deserialize)]
+// struct Animation {
+//     blendMode: i32,
+//     duration: f64,
+//     name: String,
+//     tracks: Vec<TrackItem>, // Array of TrackItem structs
+//     uuid: String,
+// }
 
 // #[derive(Deserialize)]
 // struct TrackItem {
@@ -23,14 +22,7 @@ struct Animation {
 //     r#type: String, // Use r# to avoid "type" keyword clash
 // }
 
-/**
-fn print_type_of<T>(_: &T) {
-    println!("{}", std::any::type_name::<T>())
-}
-*/
-
 fn main() {
-   
     // read json data from file, and save it to Redis
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("debug"));
 
@@ -39,6 +31,10 @@ fn main() {
     let data_dir = Path::new("./data");
 
     let paths = fs::read_dir(data_dir).expect("data_dir should be a directory");
+
+    let client = Client::open("redis://127.0.0.1:6379").expect("Redis connection failed");
+
+    let mut con = client.get_connection().expect("Failed to get Redis connection");
 
     for path in paths {
         let path_buf = path.unwrap().path(); // Handle potential errors
@@ -67,21 +63,26 @@ fn main() {
             format!("{:.2}", (contents.as_bytes().len() as f64) / 1024.0 / 1024.0)
         );
 
-        let data: Animation = serde_json
+        let data: serde_json::Value = serde_json
             ::from_str(&contents)
             .expect("Should have been able to parse the json");
 
-        // println!("Name: {}, Duration: {}, uuid: {}", data.name, data.duration, data.uuid);
+        let animation_name = match data["name"].as_str() {
+            Some(name) => name.to_string(),
+            None => panic!("Invalid data type for 'name' field"),
+        };
 
-        let serialized_data = serde_json::to_string(&contents).expect("Failed to serialize data");
+        con.set::<std::string::String, std::string::String, ()>(
+            animation_name.clone(),
+            serde_json::to_string(&data).unwrap()
+        ).expect("Failed to save data to Redis");
 
-        let client = Client::open("redis://127.0.0.1:6379").expect("Redis connection failed");
-        let mut con = client.get_connection().expect("Failed to get Redis connection");
+        info!("Animation data {} saved to Redis successfully!", &animation_name);
 
-        con.set::<std::string::String, std::string::String, ()>(data.name, serialized_data).expect(
-            "Failed to save data to Redis"
-        );
+        // println!("Pretty-printed JSON: {}", serde_json::to_string(&data).unwrap());
 
-        println!("Animation data saved to Redis successfully!");
+        let value: String = con.get(&animation_name).unwrap();
+
+        println!("value: {}", value);
     }
 }
