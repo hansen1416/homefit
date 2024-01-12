@@ -81,8 +81,8 @@ fn main() {
 
         // println!("Pretty-printed JSON: {}", serde_json::to_string(&data).unwrap());
 
-        let value: String = con.get(&animation_name).unwrap();
+        // let value: String = con.get(&animation_name).unwrap();
 
-        println!("value: {}", value);
+        // println!("value: {}", value);
     }
 }
