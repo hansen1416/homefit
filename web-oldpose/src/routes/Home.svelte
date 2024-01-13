@@ -3,7 +3,6 @@
 	import { onDestroy, onMount } from "svelte";
 	import { loadFBX, areAllValuesTrue } from "../utils/ropes";
 	import { websocket, websocket_state } from "../store/websocketStore";
-	import { watch } from "../store/watch.js";
 	import animation_queue from "../store/timelineStore";
 	import animation_data from "../store/animationDataStore";
 	import _ from "lodash";
@@ -24,7 +23,7 @@
 	};
 
 	onMount(() => {
-		Promise.all([loadFBX("fbx/mixamo0.fbx")]).then(([fbx0]) => {
+		Promise.all([loadFBX("fbx/taunt.fbx")]).then(([fbx0]) => {
 			diva = fbx0;
 
 			wsClient = $websocket;
@@ -40,13 +39,15 @@
 				// first split the message
 				let [name, data] = msg.split("::");
 
+				console.log("received animation data for " + name);
+
 				animation_data[name] = data;
 
 				animation_status[name] = true;
 
 				if (areAllValuesTrue(animation_status)) {
 					// update animation_queue, it will trigger watch in Scene.svelte
-					$animation_queue = animation_required;
+					animation_queue.set(animation_required);
 				}
 			};
 		});
@@ -54,8 +55,8 @@
 
 	onDestroy(() => {});
 
-	$: watch(websocket_state, ($websocket_state) => {
-		if ($websocket_state === WebSocket.OPEN) {
+	websocket_state.subscribe((state_value) => {
+		if (state_value === WebSocket.OPEN) {
 			if (animation_request_sent) {
 				return;
 			}

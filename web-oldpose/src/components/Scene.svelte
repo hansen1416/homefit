@@ -8,7 +8,6 @@
 	import PoseDetector from "../lib/PoseDetector";
 	import animation_queue from "../store/timelineStore";
 	import animation_data from "../store/animationDataStore";
-	import { watch } from "../store/watch";
 	import _ from "lodash";
 
 	/** @type {HTMLVideoElement} */
@@ -32,8 +31,10 @@
 	let animation_pointer = 0;
 
 	// diva is the main character, play standard animation
+	/** @type {THREE.Object3D | THREE.Group} */
 	export let diva;
 	// shaow is user pose projection
+	/** @type {THREE.Object3D | THREE.Group} */
 	export let shadow;
 
 	/** @type {THREE.AnimationMixer} */
@@ -41,7 +42,13 @@
 	/** @type {THREE.AnimationAction} */
 	let diva_action;
 
+	const clock = new THREE.Clock();
+
 	function animate() {
+		if (diva_mixer && diva_action) {
+			diva_mixer.update(clock.getDelta());
+		}
+
 		// update physics world and threejs renderer
 		threeScene.onFrameUpdate(stats);
 
@@ -83,6 +90,16 @@
 	 */
 	onDestroy(() => {
 		cancelAnimationFrame(animation_pointer);
+
+		diva_mixer.stopAllAction();
+
+		diva_mixer.removeEventListener("finished", (e) => {});
+
+		threeScene.dispose();
+
+		diva_mixer = undefined;
+
+		diva_action = undefined;
 	});
 
 	/**
@@ -95,19 +112,27 @@
 		}
 	}
 
-	$: if (typeof diva === "object" && diva.isObject3D === true) {
-		threeScene.scene.add(diva);
+	$: if (threeScene && typeof diva === "object" && diva.isObject3D === true) {
+		// const mixer = threeScene.addObj(diva);
 
 		diva_mixer = new THREE.AnimationMixer(diva);
 
-		diva_mixer.addEventListener("finished", () => {
+		diva_mixer.addEventListener("finished", (e) => {
 			// when one animation finished, remove the first animation from queue
-			// this will trigger the watch function on `$animation_queue` below
-			$animation_queue = _.tail($animation_queue);
+			// this will trigger the watch function on `animation_queue` below
+			animation_queue.update((a_queue) => {
+				return _.tail(a_queue);
+			});
 		});
+
+		threeScene.scene.add(diva);
 	}
 
-	$: if (typeof shadow === "object" && shadow.isObject3D === true) {
+	$: if (
+		threeScene &&
+		typeof shadow === "object" &&
+		shadow.isObject3D === true
+	) {
 		playerController = new PlayerController(shadow);
 		threeScene.scene.add(shadow);
 	}
@@ -118,9 +143,9 @@
 	 * if no, play the first animation
 	 * if yes, do nothing
 	 */
-	$: watch(animation_queue, ($animation_queue) => {
+	animation_queue.subscribe((a_queue) => {
 		// no animation in queue, do nothing
-		if ($animation_queue.length === 0) {
+		if (a_queue.length === 0) {
 			return;
 		}
 		// another animation is playing, do nothing
@@ -132,30 +157,34 @@
 			return;
 		}
 
-		const animation_name = $animation_queue[0].name;
-		const animation_repeat = $animation_queue[0].repeat;
+		if (!threeScene) {
+			return;
+		}
+
+		const animation_name = a_queue[0].name;
+		const animation_repeat = a_queue[0].repeat;
 
 		diva_mixer.stopAllAction();
 
-		console.log(animation_data[animation_name])
-		console.log(typeof animation_data[animation_name])
-
 		// play the first animation in queue, the animation_data should be prepared before hand
-		diva_action = diva_mixer.clipAction(
-			THREE.AnimationClip.parse(animation_data[animation_name])
-		);
+		const animation_json = JSON.parse(animation_data[animation_name]);
 
-		console.log(diva_action, animation_data);
+		const animation_clip = THREE.AnimationClip.parse(animation_json);
+
+		diva_action = diva_mixer.clipAction(animation_clip);
 
 		diva_action.reset();
-		diva_action.setLoop(THREE.LoopOnce, animation_repeat);
+
+		diva_action.setLoop(THREE.LoopRepeat, animation_repeat);
 
 		// keep model at the position where it stops
-		diva_action.clampWhenFinished = false;
+		diva_action.clampWhenFinished = true;
 
 		diva_action.enabled = true;
 
 		diva_action.play();
+
+		console.log("play animation", animation_name);
 	});
 </script>
 

@@ -1,6 +1,5 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 
 export const SceneProperties = {
 	camera_height: 60,
@@ -11,6 +10,24 @@ Object.freeze(SceneProperties);
 
 let instance;
 
+/**
+ * @class ThreeScene
+ * @description
+ * This class is a singleton, so we only have 1 threejs scene
+ *
+ * @property {THREE.Scene} scene
+ * @property {THREE.PerspectiveCamera} camera
+ * @property {THREE.WebGLRenderer} renderer
+ * @property {OrbitControls} controls
+ * @property {THREE.DirectionalLight} light
+ * @property {THREE.Clock} clock
+ *
+ * @method onFrameUpdate
+ * @method resetControl
+ *
+ *
+ *
+ */
 export default class ThreeScene {
 	/**
 	 *
@@ -31,18 +48,6 @@ export default class ThreeScene {
 
 		this.scene.add(new THREE.AxesHelper(5));
 
-		// this.camera = new THREE.OrthographicCamera(
-		// 	width / -2, // left
-		// 	width / 2, // right
-		// 	height / 2, // top
-		// 	height / -2, // bottom
-		// 	0.1, // near
-		// 	width * 2 // far
-		// );
-
-		// this.camera.zoom = 60; // zoom in by 50%
-		// this.camera.position.set(0, 0.1, -4);
-
 		this.camera = new THREE.PerspectiveCamera(
 			75,
 			width / height,
@@ -59,20 +64,12 @@ export default class ThreeScene {
 		this.camera.updateProjectionMatrix(); // update the camera's projection matrix
 
 		// env light
-		this.scene.add(new THREE.AmbientLight(0xffffff, 0.1));
+		this.scene.add(new THREE.AmbientLight(0xffffff, 1));
 
-		this.scene.background = new THREE.Color(0x001e62);
+		this.scene.background = new THREE.Color(0xcccccc);
 
-		/**
-		// mimic the sun light. maybe update light position later
-		this.light = new THREE.PointLight(0xffffff, 0.7);
-		this.light.position.set(0, 100, 0);
-		this.light.castShadow = true;
-		// this.light.shadow.mapSize.width = 2048;
-		// this.light.shadow.mapSize.height = 2048;
- */
-		this.light = new THREE.DirectionalLight(0xffffff, 0.9);
-		this.light.position.set(0, 100, 0);
+		this.light = new THREE.DirectionalLight(0xffffff, 1);
+		this.light.position.set(0, 100, 100);
 		this.light.castShadow = true;
 
 		this.light.target = new THREE.Object3D();
@@ -114,6 +111,8 @@ export default class ThreeScene {
 		this.controls.reset();
 	}
 
+	/**
+	 * 
 	loadFbx(url) {
 		const fbxLoader = new FBXLoader();
 		fbxLoader.load(
@@ -129,15 +128,18 @@ export default class ThreeScene {
 				// })
 				// object.scale.set(.01, .01, .01)
 
+				// Create an AnimationMixer, and get the list of AnimationClip instances
+				this.mixer = new THREE.AnimationMixer(object);
+
+				this.mixer.clipAction(object.animations[0]).play();
+
 				this.scene.add(object);
 
-				// console.log(object);
+				// // console.log(object);
 
-				// Create an AnimationMixer, and get the list of AnimationClip instances
-				const mixer = new THREE.AnimationMixer(object);
-				// const clips = mesh.animations;
+				// // const clips = mesh.animations;
 
-				mixer.clipAction(object.animations[0]);
+				// mixer.clipAction(object.animations[0]);
 			},
 			(xhr) => {
 				console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
@@ -147,8 +149,7 @@ export default class ThreeScene {
 			}
 		);
 	}
-
-	/**
+	
 	unload(target:THREE.Object3D){
         target.removeFromParent();
         target.traverse((child:any) => {
@@ -174,6 +175,6 @@ export default class ThreeScene {
     }
 
 	missing child.skeleton.boneTexture.dispose(); and you all set :+1:
-but if you never use skinned mesh, you can skip this.
- */
+	but if you never use skinned mesh, you can skip this.
+	*/
 }
