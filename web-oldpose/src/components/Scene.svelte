@@ -182,6 +182,8 @@
 
 		diva_action.enabled = true;
 
+		// diva_action.fadeIn(0.5);
+
 		diva_action.play();
 
 		console.log("play animation", animation_name);

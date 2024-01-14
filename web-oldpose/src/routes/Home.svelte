@@ -17,10 +17,13 @@
 		{ name: "pointing-forward", repeat: 1 },
 	];
 
-	const animation_status = {
-		greeting: false,
-		"pointing-forward": false,
-	};
+	// {
+	// 	greeting: false,
+	// 	"pointing-forward": false,
+	// };
+	const animation_status = Object.fromEntries(
+		animation_required.map((animation) => [animation.name, false])
+	);
 
 	onMount(() => {
 		Promise.all([loadFBX("fbx/taunt.fbx")]).then(([fbx0]) => {
@@ -55,6 +58,7 @@
 
 	onDestroy(() => {});
 
+	// when websocket is connected, request the animation data needed in this component from redis
 	websocket_state.subscribe((state_value) => {
 		if (state_value === WebSocket.OPEN) {
 			if (animation_request_sent) {
