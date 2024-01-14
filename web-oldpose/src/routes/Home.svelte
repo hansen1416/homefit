@@ -1,11 +1,12 @@
 <script>
-	import Scene from "../components/Scene.svelte";
+	import _ from "lodash";
 	import { onDestroy, onMount } from "svelte";
 	import { loadFBX, areAllValuesTrue } from "../utils/ropes";
 	import { websocket, websocket_state } from "../store/websocketStore";
 	import animation_queue from "../store/timelineStore";
 	import animation_data from "../store/animationDataStore";
-	import _ from "lodash";
+	import Scene from "../components/Scene.svelte";
+	import TextBubble from "../components/TextBubble.svelte";
 
 	let diva;
 	let wsClient;
@@ -81,3 +82,4 @@
 </script>
 
 <Scene {diva} shadow={undefined} />
+<TextBubble />
