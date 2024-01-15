@@ -27,6 +27,7 @@
 	);
 
 	onMount(() => {
+		// we need store to keep diva and shadow
 		Promise.all([loadFBX("fbx/taunt.fbx")]).then(([fbx0]) => {
 			diva = fbx0;
 
