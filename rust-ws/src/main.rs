@@ -15,6 +15,13 @@ async fn index() -> impl Responder {
     }))
 }
 
+async fn menu() -> impl Responder {
+    HttpResponse::Ok().json(json!({
+        "yoga": ["stretch and relax", "beginner", "intermediate", "advanced"],
+        "HIIT": ["beginner", "intermediate", "advanced"],
+    }))
+}
+
 /// WebSocket handshake and start `MyWebSocket` actor.
 async fn echo_ws(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, Error> {
     ws::start(MyWebSocket::new(), &req, stream)
@@ -28,8 +35,9 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(|| {
         App::new()
-            // WebSocket UI HTML file
+            // http routes
             .service(web::resource("/").to(index))
+            .service(web::resource("/menu").to(menu))
             // websocket route
             .service(web::resource("/ws").route(web::get().to(echo_ws)))
             // enable logger

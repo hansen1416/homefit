@@ -1,48 +1,32 @@
 <script>
 	import { onDestroy, onMount } from "svelte";
-	import Movinwords from "movinwords";
-	// import "movinwords/movinwords.css";
-	import "../../node_modules/movinwords/dist/movinwords.css";
+	import Typed from "typed.js";
 
-	let text = "Hello world!";
+	export let text;
+
+	let typedInstance;
 
 	onMount(() => {
-		// Triggers start after 2 seconds.
-		setInterval(() => {
-			const mw = new Movinwords({
-				el: ".text-bubble",
-				// sentence: text,
-				autostart: true,
-				events: {
-					start: (options) => {
-						console.log("Started!", options);
-					},
-					wordTransitionStart: (options) => {
-						console.log("Word Transition Started", options);
-					},
-					wordTransitionEnd: (options) => {
-						console.log("Word Transition Ended", options);
-					},
-					end: (options) => {
-						console.log("Ended!", options);
-
-						text = "";
-					},
-				},
-			});
-
-			// mw.start();
-
-			console.log(1111);
-		}, 2000);
+		typedInstance = new Typed("#typed-text", {
+			strings: [text],
+			//   typeSpeed: 50,
+			//   loop: false,
+		});
 	});
+
+	onDestroy(() => {
+		typedInstance.destroy();
+	});
+
+	$: if (text) {
+		typedInstance.destroy();
+
+		typedInstance.strings = [text];
+		typedInstance.start();
+	}
 </script>
 
-<!-- <link
-	rel="stylesheet"
-	href="https://unpkg.com/movinwords/dist/movinwords.css"
-/> -->
-<div class="text-bubble">{text}</div>
+<div id="text_bubble" class="text-bubble"></div>
 
 <style>
 	.text-bubble {

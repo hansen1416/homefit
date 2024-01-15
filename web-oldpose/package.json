@@ -22,8 +22,9 @@
   "dependencies": {
     "@dimforge/rapier3d": "^0.11.2",
     "@mediapipe/pose": "^0.5.1675469404",
+    "axios": "^1.6.5",
     "lodash": "^4.17.21",
-    "movinwords": "^1.5.0",
-    "three": "^0.158.0"
+    "three": "^0.158.0",
+    "typed.js": "^2.1.0"
   }
 }

@@ -79,6 +79,12 @@
 			animation_request_sent = true;
 		}
 	});
+
+	animation_queue.subscribe((a_queue) => {
+		if (a_queue.length === 0) {
+			// todo render menu component
+		}
+	});
 </script>
 
 <Scene {diva} shadow={undefined} />
