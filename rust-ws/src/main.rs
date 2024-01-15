@@ -16,10 +16,16 @@ async fn index() -> impl Responder {
 }
 
 async fn menu() -> impl Responder {
-    HttpResponse::Ok().json(json!({
-        "yoga": ["stretch and relax", "beginner", "intermediate", "advanced"],
-        "HIIT": ["beginner", "intermediate", "advanced"],
-    }))
+    HttpResponse::Ok().json(json!([
+        {
+            name: "yoga",
+            children: ["stretch and relax", "beginner", "intermediate", "advanced"]
+        }
+        {
+            name: "HIIT",
+            children: ["beginner", "intermediate", "advanced"]
+        }
+    ]))
 }
 
 /// WebSocket handshake and start `MyWebSocket` actor.

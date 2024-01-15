@@ -34,18 +34,29 @@
 
 	let menu_obj;
 
-	onMount(() => {
-		// request menu data from /menu
-		axios.get("/menu").then((response) => {
-			menu_obj = response.data;
-		});
-	});
+	let menu_request = axios.get("/menu");
+
+	onMount(() => {});
 
 	onDestroy(() => {});
 </script>
 
 <section class="menu">
 	<!-- iterate over menu -->
+	{#await menu_request}
+		<!-- promise is pending -->
+		<p>waiting for the promise to resolve...</p>
+	{:then items}
+		<!-- promise was fulfilled or not a Promise -->
+		<p>The value is {items}</p>
+		{#each items as { name, children }, i (name)}
+			<li>{i + 1}: {name} x </li>
+		{/each}
+
+	{:catch error}
+		<!-- promise was rejected -->
+		<p>Something went wrong: {error.message}</p>
+	{/await}
 	<div class="menu-item"></div>
 </section>
 
