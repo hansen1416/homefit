@@ -1,7 +1,7 @@
 <script>
 	import _ from "lodash";
 	import { onDestroy, onMount } from "svelte";
-	import { loadFBX, areAllValuesTrue } from "../utils/ropes";
+	import { areAllValuesTrue } from "../utils/ropes";
 	import { websocket, websocket_state } from "../store/websocketStore";
 	import animation_queue from "../store/timelineStore";
 	import animation_data from "../store/animationDataStore";
@@ -38,7 +38,7 @@
 
 	onMount(() => {
 		// we need store to keep diva and shadow
-		Promise.all([loadFBX("fbx/taunt.fbx")]).then(([fbx0]) => {
+		Promise.all([getDiva()]).then(([fbx0]) => {
 			diva = fbx0;
 
 			wsClient = $websocket;
