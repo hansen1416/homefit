@@ -13,9 +13,19 @@
 
 	let animation_request_sent = false;
 
+	let text_bubble = "";
+
 	const animation_required = [
-		{ name: "greeting", repeat: 1 },
-		{ name: "pointing-forward", repeat: 1 },
+		{
+			name: "greeting",
+			repeat: 1,
+			message: "Hello, I am Anya, how may I assisst you today?",
+		},
+		{
+			name: "pointing-forward",
+			repeat: 1,
+			message: "Here are available workout options.",
+		},
 	];
 
 	// {
@@ -23,7 +33,7 @@
 	// 	"pointing-forward": false,
 	// };
 	const animation_status = Object.fromEntries(
-		animation_required.map((animation) => [animation.name, false])
+		animation_required.map((animation) => [animation.name, false]),
 	);
 
 	onMount(() => {
@@ -84,9 +94,19 @@
 	animation_queue.subscribe((a_queue) => {
 		if (a_queue.length === 0) {
 			// todo render menu component
+		} else {
+			// check is current animation item has a `message` field, if yes, render TextBubble component
+			const current_animation = a_queue[0];
+			if (current_animation.message) {
+				// render TextBubble component
+				text_bubble = current_animation.message;
+			}
 		}
 	});
 </script>
 
 <Scene {diva} shadow={undefined} />
-<TextBubble />
+<!-- render TextBubble on text_bubble -->
+{#if text_bubble}
+	<TextBubble text={text_bubble} />
+{/if}
