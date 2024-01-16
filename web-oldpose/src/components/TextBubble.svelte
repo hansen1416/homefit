@@ -18,7 +18,8 @@
 		typedInstance.destroy();
 	});
 
-	$: if (text) {
+	$: if (typedInstance && text) {
+		// each time text changes, destroy the old instance and create a new one
 		typedInstance.destroy();
 
 		typedInstance.strings = [text];

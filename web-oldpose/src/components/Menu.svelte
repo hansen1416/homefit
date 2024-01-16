@@ -48,16 +48,21 @@
 		<p>waiting for the promise to resolve...</p>
 	{:then items}
 		<!-- promise was fulfilled or not a Promise -->
-		<p>The value is {items}</p>
-		{#each items as { name, children }, i (name)}
-			<li>{i + 1}: {name} x </li>
+		{#each items as { name, children }}
+			<div class="menu-item">
+				<div>{name}</div>
+				<div>
+					{#each children as { name, id }}
+						<div>{name}</div>
+						<div>link to {id}</div>
+					{/each}
+				</div>
+			</div>
 		{/each}
-
 	{:catch error}
 		<!-- promise was rejected -->
 		<p>Something went wrong: {error.message}</p>
 	{/await}
-	<div class="menu-item"></div>
 </section>
 
 <style>

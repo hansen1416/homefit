@@ -1,31 +1,56 @@
 use serde_json::json;
-use actix_web::{middleware, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder};
+use actix_web::{ middleware, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder };
 use actix_web_actors::ws;
+use serde::Serialize;
 
 mod server;
 use self::server::MyWebSocket;
 
+// define menu structure
+#[derive(Serialize)]
+struct Menu {
+    name: String,
+    children: Vec<Workout>,
+}
+
+#[derive(Serialize)]
+struct Workout {
+    name: String,
+    id: String,
+}
+
+async fn menu() -> impl Responder {
+    // Sample data
+    let menu_data = vec![
+        Menu {
+            name: "yoga".to_string(),
+            children: vec![
+                Workout { name: "stretch and relax".to_string(), id: "3245gdf".to_string() },
+                Workout { name: "beginner".to_string(), id: "fadsfa".to_string() }
+            ],
+        },
+        Menu {
+            name: "HIIT".to_string(),
+            children: vec![
+                Workout { name: "stretch and relax".to_string(), id: "15hfg".to_string() },
+                Workout { name: "beginner".to_string(), id: "q3t2fds".to_string() }
+            ],
+        }
+    ];
+
+    HttpResponse::Ok().json(json!(menu_data))
+}
+
 async fn index() -> impl Responder {
-    HttpResponse::Ok().json(json!({
+    HttpResponse::Ok().json(
+        json!({
         "message": "Hello from the server!",
         "data": {
             "key1": "value1",
             "key2": 42
         }
-    }))
-}
-
-async fn menu() -> impl Responder {
-    HttpResponse::Ok().json(json!([
-        {
-            name: "yoga",
-            children: ["stretch and relax", "beginner", "intermediate", "advanced"]
-        }
-        {
-            name: "HIIT",
-            children: ["beginner", "intermediate", "advanced"]
-        }
-    ]))
+    })
+    )
 }
 
 /// WebSocket handshake and start `MyWebSocket` actor.
@@ -49,8 +74,7 @@ async fn main() -> std::io::Result<()> {
             // enable logger
             .wrap(middleware::Logger::default())
     })
-    .workers(2)
-    .bind(("127.0.0.1", 3333))?
-    .run()
-    .await
+        .workers(2)
+        .bind(("127.0.0.1", 3333))?
+        .run().await
 }

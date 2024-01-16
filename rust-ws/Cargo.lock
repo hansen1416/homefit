@@ -1107,6 +1107,7 @@ dependencies = [
  "futures-util",
  "log",
  "redis",
+ "serde",
  "serde_json",
  "tokio",
  "tokio-stream",
