@@ -34,7 +34,8 @@
 
 	let menu_obj;
 
-	let menu_request = axios.get("/menu");
+	// CORS
+	let menu_request = axios.get("http://localhost:3333/menu");
 
 	onMount(() => {});
 

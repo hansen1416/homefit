@@ -7,7 +7,7 @@
 	let typedInstance;
 
 	onMount(() => {
-		typedInstance = new Typed("#typed-text", {
+		typedInstance = new Typed("#text_bubble", {
 			strings: [text],
 			//   typeSpeed: 50,
 			//   loop: false,
@@ -23,6 +23,9 @@
 		typedInstance.destroy();
 
 		typedInstance.strings = [text];
+
+		console.log("text changed to " + typedInstance.strings);
+
 		typedInstance.start();
 	}
 </script>
