@@ -32,10 +32,18 @@
 	import { onDestroy, onMount } from "svelte";
 	import axios from "axios";
 
-	let menu_obj;
-
 	// CORS
-	let menu_request = axios.get("http://localhost:3333/menu");
+	let menu_request = getMenu();
+
+	async function getMenu() {
+		try {
+			const response = await axios.get("http://localhost:3333/menu");
+
+			return response.data;
+		} catch (error) {
+			console.error(error);
+		}
+	}
 
 	onMount(() => {});
 
