@@ -77,12 +77,19 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(|| {
         let cors = Cors::default()
-            .allowed_origin("localhost:5173") // Allow specific origin
+            .allowed_origin("http://localhost:5173") // Allow specific origin
             .allowed_methods(vec!["GET", "POST", "OPTION"]) // Allow specific methods
             .allowed_headers(
                 vec![http::header::AUTHORIZATION, http::header::ACCEPT, http::header::CONTENT_TYPE]
             )
-            .max_age(3600);
+            .max_age(3600); // Cache preflight response for 3600 seconds
+        // Preflight Request: When a browser makes a non-simple cross-origin request
+        // it first sends a preflight request (an OPTIONS request) to the server
+        // to check if the actual request is allowed.
+        // Max-Age: The max_age directive in a CORS response indicates
+        // how long the browser can cache the results of a preflight request.
+        // This means the browser won't send another preflight request for subsequent requests
+        // of the same type within that time frame, improving performance.
 
         App::new()
             .wrap(cors)
