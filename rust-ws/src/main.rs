@@ -1,6 +1,17 @@
-use serde_json::json;
-use actix_web::{ middleware, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder };
+use actix_web::{
+    middleware,
+    http,
+    web,
+    App,
+    Error,
+    HttpRequest,
+    HttpResponse,
+    HttpServer,
+    Responder,
+};
 use actix_web_actors::ws;
+use actix_cors::Cors;
+use serde_json::json;
 use serde::Serialize;
 
 mod server;
@@ -65,7 +76,16 @@ async fn main() -> std::io::Result<()> {
     log::info!("starting HTTP server at http://localhost:3333");
 
     HttpServer::new(|| {
+        let cors = Cors::default()
+            .allowed_origin("localhost:5173") // Allow specific origin
+            .allowed_methods(vec!["GET", "POST", "OPTION"]) // Allow specific methods
+            .allowed_headers(
+                vec![http::header::AUTHORIZATION, http::header::ACCEPT, http::header::CONTENT_TYPE]
+            )
+            .max_age(3600);
+
         App::new()
+            .wrap(cors)
             // http routes
             .service(web::resource("/").to(index))
             .service(web::resource("/menu").to(menu))
