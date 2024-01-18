@@ -3,6 +3,7 @@
 	import { websocket, websocket_state } from "./store/websocketStore";
 	import WebSocketClient from "./lib/WebSocketClient";
 	import ExtractAnimationData from "./routes/ExtractAnimationData.svelte";
+	import Scene from "./components/Scene.svelte";
 	import Home from "./routes/Home.svelte";
 	import Gym from "./routes/Gym.svelte";
 
@@ -20,6 +21,7 @@
 
 <Router>
 	<div>
+		<Scene />
 		<Route path="/" component={Home} />
 		<Route path="/extract" component={ExtractAnimationData} />
 		<Route path="/gym/:id" let:params>

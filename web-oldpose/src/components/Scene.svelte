@@ -3,11 +3,12 @@
 	import * as THREE from "three";
 	import ThreeScene from "../lib/ThreeScene";
 	import Stats from "three/examples/jsm/libs/stats.module.js";
-	import { invokeCamera } from "../utils/ropes";
+	import { invokeCamera, loadGLTF } from "../utils/ropes";
 	import PlayerController from "../lib/PlayerController";
 	import PoseDetector from "../lib/PoseDetector";
 	import animation_queue from "../store/timelineStore";
 	import animation_data from "../store/animationDataStore";
+	import { diva, shadow } from "../store/archetypeStore";
 	import _ from "lodash";
 
 	/** @type {HTMLVideoElement} */
@@ -29,13 +30,6 @@
 	let detector_ready = false;
 	let show_video = false;
 	let animation_pointer = 0;
-
-	// diva is the main character, play standard animation
-	/** @type {THREE.Object3D | THREE.Group} */
-	export let diva;
-	// shaow is user pose projection
-	/** @type {THREE.Object3D | THREE.Group} */
-	export let shadow;
 
 	/** @type {THREE.AnimationMixer} */
 	let diva_mixer;
@@ -64,10 +58,21 @@
 		threeScene = new ThreeScene(
 			canvas,
 			document.documentElement.clientWidth,
-			document.documentElement.clientHeight
+			document.documentElement.clientHeight,
 		);
 		// -100 is ground level
 		threeScene.scene.position.set(0, -100, 0);
+
+		/**
+		 * testing code
+		 */
+		loadGLTF("glb/vr_exhibition_gallery_baked.glb").then((gltf) => {
+			gltf.scene.name = "scene";
+
+			threeScene.scene.add(gltf.scene);
+
+			threeScene.scene.getObjectByName("scene").scale.set(20, 20, 20);
+		});
 
 		if (import.meta.env.DEV) {
 			stats = new Stats();
@@ -112,8 +117,18 @@
 		}
 	}
 
-	$: if (threeScene && typeof diva === "object" && diva.isObject3D === true) {
-		// const mixer = threeScene.addObj(diva);
+	diva.subscribe((diva) => {
+		if (
+			!threeScene ||
+			typeof diva !== "object" ||
+			diva.isObject3D !== true ||
+			threeScene.scene.getObjectByName("diva")
+		) {
+			// diva is not ready, or diva is already in the scene, do nothing
+			return;
+		}
+
+		diva.name = "diva";
 
 		diva_mixer = new THREE.AnimationMixer(diva);
 
@@ -126,16 +141,25 @@
 		});
 
 		threeScene.scene.add(diva);
-	}
+	});
 
-	$: if (
-		threeScene &&
-		typeof shadow === "object" &&
-		shadow.isObject3D === true
-	) {
+	shadow.subscribe((shadow) => {
+		if (
+			!threeScene ||
+			typeof shadow !== "object" ||
+			shadow.isObject3D !== true ||
+			threeScene.scene.getObjectByName("shadow")
+		) {
+			// shadow is not ready, or shadow is already in the scene, do nothing
+			return;
+		}
+
+		shadow.name = "shadow";
+
 		playerController = new PlayerController(shadow);
+
 		threeScene.scene.add(shadow);
-	}
+	});
 
 	/**
 	 * watch animation_queue, when it changes,

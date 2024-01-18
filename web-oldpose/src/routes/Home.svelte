@@ -1,16 +1,14 @@
 <script>
 	import _ from "lodash";
 	import { onDestroy, onMount } from "svelte";
-	import { areAllValuesTrue } from "../utils/ropes";
-	import { getDiva } from "../utils/methods";
+	import { areAllValuesTrue, loadFBX } from "../utils/ropes";
 	import { websocket, websocket_state } from "../store/websocketStore";
+	import { diva } from "../store/archetypeStore";
 	import animation_queue from "../store/timelineStore";
 	import animation_data from "../store/animationDataStore";
-	import Scene from "../components/Scene.svelte";
 	import TextBubble from "../components/TextBubble.svelte";
 	import Menu from "../components/Menu.svelte";
 
-	let diva;
 	let wsClient;
 
 	let animation_request_sent = false;
@@ -37,39 +35,43 @@
 	// 	"pointing-forward": false,
 	// };
 	const animation_status = Object.fromEntries(
-		animation_required.map((animation) => [animation.name, false])
+		animation_required.map((animation) => [animation.name, false]),
 	);
 
 	onMount(() => {
 		// we need store to keep diva and shadow
-		Promise.all([getDiva()]).then(([fbx0]) => {
-			diva = fbx0;
+		Promise.all([loadFBX("fbx/taunt.fbx")])
+			.then(([fbx0]) => {
+				diva.set(fbx0);
 
-			wsClient = $websocket;
+				wsClient = $websocket;
 
-			wsClient.onMessage = (msg) => {
-				// get animation data from redis
-				// where in format like name::data
-				// update animation_data
-				if (typeof msg !== "string") {
-					return;
-				}
+				wsClient.onMessage = (msg) => {
+					// get animation data from redis
+					// where in format like name::data
+					// update animation_data
+					if (typeof msg !== "string") {
+						return;
+					}
 
-				// first split the message
-				let [name, data] = msg.split("::");
+					// first split the message
+					let [name, data] = msg.split("::");
 
-				console.log("received animation data for " + name);
+					console.log("received animation data for " + name);
 
-				animation_data[name] = data;
+					animation_data[name] = data;
 
-				animation_status[name] = true;
+					animation_status[name] = true;
 
-				if (areAllValuesTrue(animation_status)) {
-					// update animation_queue, it will trigger watch in Scene.svelte
-					animation_queue.set(animation_required);
-				}
-			};
-		});
+					if (areAllValuesTrue(animation_status)) {
+						// update animation_queue, it will trigger watch in Scene.svelte
+						animation_queue.set(animation_required);
+					}
+				};
+			})
+			.catch((err) => {
+				console.error(err);
+			});
 	});
 
 	onDestroy(() => {});
@@ -110,7 +112,6 @@
 	});
 </script>
 
-<Scene {diva} shadow={undefined} />
 <!-- render TextBubble on text_bubble -->
 {#if text_bubble}
 	<TextBubble text={text_bubble} />

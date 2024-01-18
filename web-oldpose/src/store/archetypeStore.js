@@ -1,3 +1,6 @@
-const archetypes = { diva: null, shadow: null };
+import { writable } from "svelte/store";
 
-export default archetypes;
+const diva = writable(null);
+const shadow = writable(null);
+
+export { diva, shadow };
