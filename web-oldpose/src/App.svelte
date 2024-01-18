@@ -22,6 +22,8 @@
 	<div>
 		<Route path="/" component={Home} />
 		<Route path="/extract" component={ExtractAnimationData} />
-		<Route path="/gym" component={Gym} />
+		<Route path="/gym/:id" let:params>
+			<Gym id={params.id} />
+		</Route>
 	</div>
 </Router>

@@ -33,7 +33,7 @@
 	import axios from "axios";
 
 	// CORS
-	let menu_request = getMenu();
+	const menu_request = getMenu();
 
 	async function getMenu() {
 		try {
