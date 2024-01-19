@@ -1,9 +1,9 @@
 <script>
 	import _ from "lodash";
 	import { onDestroy, onMount } from "svelte";
-	import { areAllValuesTrue, loadFBX } from "../utils/ropes";
+	import { areAllValuesTrue, loadFBX, loadGLTF } from "../utils/ropes";
 	import { websocket, websocket_state } from "../store/websocketStore";
-	import { diva } from "../store/archetypeStore";
+	import { diva, scenery } from "../store/archetypeStore";
 	import animation_queue from "../store/timelineStore";
 	import animation_data from "../store/animationDataStore";
 	import TextBubble from "../components/TextBubble.svelte";
@@ -39,10 +39,23 @@
 	);
 
 	onMount(() => {
+		loadGLTF("glb/vr_exhibition_gallery_baked.glb").then((gltf) => {
+			gltf.scene.name = "scene";
+
+			threeScene.scene.add(gltf.scene);
+
+			threeScene.scene.getObjectByName("scene").scale.set(20, 20, 20);
+		});
+
 		// we need store to keep diva and shadow
-		Promise.all([loadFBX("fbx/taunt.fbx")])
-			.then(([fbx0]) => {
+		Promise.all([
+			loadFBX("fbx/taunt.fbx"),
+			loadGLTF("glb/vr_exhibition_gallery_baked.glb"),
+		])
+			.then(([fbx0, room]) => {
 				diva.set(fbx0);
+
+				scenery.set(room);
 
 				wsClient = $websocket;
 
