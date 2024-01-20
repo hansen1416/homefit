@@ -44,6 +44,6 @@
 		width: 300px;
 		min-height: 30px;
 		margin-left: -150px;
-		border: 1px solid #fff;
+		background-color: rgba(255, 255, 255, 0.6);
 	}
 </style>

@@ -31,6 +31,7 @@
     */
 	import { onDestroy, onMount } from "svelte";
 	import axios from "axios";
+	import { Link } from "svelte-routing";
 
 	// CORS
 	const menu_request = getMenu();
@@ -60,12 +61,11 @@
 		{#each items as { name, children }}
 			<div class="menu-item">
 				<div>{name}</div>
-				<div>
-					{#each children as { name, id }}
-						<div>{name}</div>
-						<div>link to {id}</div>
-					{/each}
-				</div>
+				{#each children as { name, id }}
+					<div>
+						<Link to="/gym/{id}">{name}</Link>
+					</div>
+				{/each}
 			</div>
 		{/each}
 	{:catch error}

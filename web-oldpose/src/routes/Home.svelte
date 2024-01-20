@@ -1,10 +1,10 @@
 <script>
 	import _ from "lodash";
 	import { onDestroy, onMount } from "svelte";
-	import { loadFBX, loadGLTF } from "../utils/ropes";
 	import WebSocketClient from "../lib/WebSocketClient";
 	import TextBubble from "../components/TextBubble.svelte";
 	import Menu from "../components/Menu.svelte";
+	import { loadDiva, loadScenery } from "../utils/mediaLoader";
 
 	import { derived } from "svelte/store";
 	import { diva, scenery } from "../store/archetypeStore";
@@ -36,24 +36,57 @@
 		},
 	];
 
+	// function loadDiva() {
+	// 	if ($diva && typeof $diva === "object" && $diva.isObject3D === true) {
+	// 		return Promise.resolve($diva);
+	// 	}
+
+	// 	return new Promise((resolve, reject) => {
+	// 		loadFBX("fbx/taunt.fbx")
+	// 			.then((fbx) => {
+	// 				resolve(fbx);
+	// 			})
+	// 			.catch((err) => {
+	// 				reject(err);
+	// 			});
+	// 	});
+	// }
+
+	// function loadScenery() {
+	// 	if (
+	// 		$scenery &&
+	// 		typeof $scenery === "object" &&
+	// 		$scenery.isObject3D === true
+	// 	) {
+	// 		return Promise.resolve($scenery);
+	// 	}
+
+	// 	return new Promise((resolve, reject) => {
+	// 		loadGLTF("glb/vr_exhibition_gallery_baked.glb")
+	// 			.then((glb) => {
+	// 				const room = glb.scene;
+
+	// 				// scale room up by 20
+	// 				room.scale.set(40, 40, 40);
+	// 				// set room position to 10, 0, 0
+	// 				room.position.set(0, 0, -500);
+	// 				// rotate room 90 degree along z axis
+	// 				room.rotation.set(0, Math.PI / -2, 0);
+
+	// 				resolve(room);
+	// 			})
+	// 			.catch((err) => {
+	// 				reject(err);
+	// 			});
+	// 	});
+	// }
+
 	onMount(() => {
 		// wsClient = $websocket;
 		// we need store to keep diva and shadow
-		Promise.all([
-			loadFBX("fbx/taunt.fbx"),
-			loadGLTF("glb/vr_exhibition_gallery_baked.glb"),
-		])
-			.then(([fbx, glb]) => {
+		Promise.all([loadDiva($diva), loadScenery($scenery)])
+			.then(([fbx, room]) => {
 				diva.set(fbx);
-
-				const room = glb.scene;
-
-				// scale room up by 20
-				room.scale.set(40, 40, 40);
-				// set room position to 10, 0, 0
-				room.position.set(0, 0, -500);
-				// rotate room 90 degree along z axis
-				room.rotation.set(0, Math.PI / -2, 0);
 
 				scenery.set(room);
 			})
@@ -156,6 +189,7 @@
 
 <!-- render TextBubble on text_bubble -->
 {#if text_bubble}
+	<!-- todo, move to App -->
 	<TextBubble text={text_bubble} />
 {/if}
 

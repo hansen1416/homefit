@@ -283,11 +283,11 @@
 				class={capture_pose ? "active" : ""}
 				on:click={() => {
 					capture_pose = !capture_pose;
-				}}><img src="svg/camera.svg" alt="Play" /></button
+				}}><img src="/svg/camera.svg" alt="Play" /></button
 			>
 
 			<button on:click={() => {}}>
-				<img src="svg/play.svg" alt="Camera" />
+				<img src="/svg/play.svg" alt="Camera" />
 			</button>
 		</div>
 	</div>
