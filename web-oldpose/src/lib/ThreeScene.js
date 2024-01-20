@@ -103,6 +103,9 @@ export default class ThreeScene {
 
 		this.controls = new OrbitControls(this.camera, canvas);
 
+		this.controls.minDistance = 150;
+		this.controls.maxDistance = 800;
+
 		this.renderer.setSize(width, height);
 	}
 
