@@ -3,12 +3,12 @@
 	import * as THREE from "three";
 	import ThreeScene from "../lib/ThreeScene";
 	import Stats from "three/examples/jsm/libs/stats.module.js";
-	import { invokeCamera, loadGLTF } from "../utils/ropes";
+	import { invokeCamera } from "../utils/ropes";
 	import PlayerController from "../lib/PlayerController";
 	import PoseDetector from "../lib/PoseDetector";
 	import animation_queue from "../store/timelineStore";
 	import animation_data from "../store/animationDataStore";
-	import { diva, shadow } from "../store/archetypeStore";
+	import { diva, shadow, scenery } from "../store/archetypeStore";
 	import _ from "lodash";
 
 	/** @type {HTMLVideoElement} */
@@ -63,17 +63,6 @@
 		// -100 is ground level
 		threeScene.scene.position.set(0, -100, 0);
 
-		/**
-		 * testing code
-		 */
-		loadGLTF("glb/vr_exhibition_gallery_baked.glb").then((gltf) => {
-			gltf.scene.name = "scene";
-
-			threeScene.scene.add(gltf.scene);
-
-			threeScene.scene.getObjectByName("scene").scale.set(20, 20, 20);
-		});
-
 		if (import.meta.env.DEV) {
 			stats = new Stats();
 			stats.showPanel(1);
@@ -98,7 +87,7 @@
 
 		diva_mixer.stopAllAction();
 
-		diva_mixer.removeEventListener("finished", (e) => {});
+		diva_mixer.removeEventListener("finished", () => {});
 
 		threeScene.dispose();
 
@@ -117,14 +106,38 @@
 		}
 	}
 
+	scenery.subscribe((scenery) => {
+		if (!threeScene) {
+			return;
+		}
+
+		if (typeof scenery !== "object" || scenery.isObject3D !== true) {
+			// scenery is not ready, do nothing
+			return;
+		}
+
+		if (threeScene.scene.getObjectByName("scenery")) {
+			// scenery is already in the scene, do nothing
+			return;
+		}
+
+		scenery.name = "scenery";
+
+		threeScene.scene.add(scenery);
+	});
+
 	diva.subscribe((diva) => {
-		if (
-			!threeScene ||
-			typeof diva !== "object" ||
-			diva.isObject3D !== true ||
-			threeScene.scene.getObjectByName("diva")
-		) {
-			// diva is not ready, or diva is already in the scene, do nothing
+		if (!threeScene) {
+			return;
+		}
+
+		if (typeof diva !== "object" || diva.isObject3D !== true) {
+			// diva is not ready, do nothing
+			return;
+		}
+
+		if (threeScene.scene.getObjectByName("diva")) {
+			// diva is already in the scene, do nothing
 			return;
 		}
 
@@ -144,13 +157,17 @@
 	});
 
 	shadow.subscribe((shadow) => {
-		if (
-			!threeScene ||
-			typeof shadow !== "object" ||
-			shadow.isObject3D !== true ||
-			threeScene.scene.getObjectByName("shadow")
-		) {
-			// shadow is not ready, or shadow is already in the scene, do nothing
+		if (!threeScene) {
+			return;
+		}
+
+		if (typeof shadow !== "object" || shadow.isObject3D !== true) {
+			// shadow is not ready, do nothing
+			return;
+		}
+
+		if (threeScene.scene.getObjectByName("shadow")) {
+			// shadow is already in the scene, do nothing
 			return;
 		}
 
