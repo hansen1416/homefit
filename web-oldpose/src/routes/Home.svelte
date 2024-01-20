@@ -8,14 +8,16 @@
 	import animation_data from "../store/animationDataStore";
 	import TextBubble from "../components/TextBubble.svelte";
 	import Menu from "../components/Menu.svelte";
-
+	// websocket client
 	let wsClient;
-
+	// make sure animation data only send once dispite of websocket state change
 	let animation_request_sent = false;
-
+	// conversation text from diva
 	let text_bubble = "";
-
+	// show menu when animation queue is empty
 	let show_menu = false;
+	// make sure menu only show when animation played, not when page first loaded
+	let animation_played = false;
 
 	const animation_required = [
 		{
@@ -30,10 +32,7 @@
 		},
 	];
 
-	// {
-	// 	greeting: false,
-	// 	"pointing-forward": false,
-	// };
+	// { animation_name: false,... };
 	const animation_status = Object.fromEntries(
 		animation_required.map((animation) => [animation.name, false]),
 	);
@@ -99,9 +98,12 @@
 
 	animation_queue.subscribe((a_queue) => {
 		if (a_queue.length === 0) {
-			// todo render menu component
-			show_menu = true;
+			if (animation_played) {
+				// when there is animation palyed, and the queue empty render menu component
+				show_menu = true;
+			}
 		} else {
+			animation_played = true;
 			// check is current animation item has a `message` field, if yes, render TextBubble component
 			const current_animation = a_queue[0];
 			if (current_animation.message) {
