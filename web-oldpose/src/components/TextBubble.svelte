@@ -22,7 +22,11 @@
 		// each time text changes, destroy the old instance and create a new one
 		typedInstance.destroy();
 
-		typedInstance.strings = [text];
+		typedInstance = new Typed("#text_bubble", {
+			strings: [text],
+			//   typeSpeed: 50,
+			//   loop: false,
+		});
 
 		console.log('text changed to "' + typedInstance.strings + '"');
 
