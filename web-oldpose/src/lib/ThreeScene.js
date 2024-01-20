@@ -24,9 +24,6 @@ let instance;
  *
  * @method onFrameUpdate
  * @method resetControl
- *
- *
- *
  */
 export default class ThreeScene {
 	/**
