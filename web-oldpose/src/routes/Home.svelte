@@ -1,15 +1,18 @@
 <script>
 	import _ from "lodash";
 	import { onDestroy, onMount } from "svelte";
-	import { areAllValuesTrue, loadFBX, loadGLTF } from "../utils/ropes";
-	import { websocket, websocket_state } from "../store/websocketStore";
+	import { loadFBX, loadGLTF } from "../utils/ropes";
+	import WebSocketClient from "../lib/WebSocketClient";
+	import TextBubble from "../components/TextBubble.svelte";
+	import Menu from "../components/Menu.svelte";
+
+	import { derived } from "svelte/store";
+	import { websocket_state } from "../store/websocketStore";
 	import { diva, scenery } from "../store/archetypeStore";
 	import animation_queue from "../store/timelineStore";
 	import animation_data from "../store/animationDataStore";
-	import TextBubble from "../components/TextBubble.svelte";
-	import Menu from "../components/Menu.svelte";
 	// websocket client
-	let wsClient;
+	let wsClient = new WebSocketClient();
 	// make sure animation data only send once dispite of websocket state change
 	let animation_request_sent = false;
 	// conversation text from diva
@@ -32,20 +35,8 @@
 		},
 	];
 
-	// { animation_name: false,... };
-	const animation_status = Object.fromEntries(
-		animation_required.map((animation) => [animation.name, false]),
-	);
-
 	onMount(() => {
-		loadGLTF("glb/vr_exhibition_gallery_baked.glb").then((gltf) => {
-			gltf.scene.name = "scene";
-
-			threeScene.scene.add(gltf.scene);
-
-			threeScene.scene.getObjectByName("scene").scale.set(20, 20, 20);
-		});
-
+		// wsClient = $websocket;
 		// we need store to keep diva and shadow
 		Promise.all([
 			loadFBX("fbx/taunt.fbx"),
@@ -53,33 +44,7 @@
 		])
 			.then(([fbx0, room]) => {
 				diva.set(fbx0);
-
 				scenery.set(room);
-
-				wsClient = $websocket;
-
-				wsClient.onMessage = (msg) => {
-					// get animation data from redis
-					// where in format like name::data
-					// update animation_data
-					if (typeof msg !== "string") {
-						return;
-					}
-
-					// first split the message
-					let [name, data] = msg.split("::");
-
-					console.log("received animation data for " + name);
-
-					animation_data[name] = data;
-
-					animation_status[name] = true;
-
-					if (areAllValuesTrue(animation_status)) {
-						// update animation_queue, it will trigger watch in Scene.svelte
-						animation_queue.set(animation_required);
-					}
-				};
 			})
 			.catch((err) => {
 				console.error(err);
@@ -88,24 +53,62 @@
 
 	onDestroy(() => {});
 
-	// when websocket is connected, request the animation data needed in this component from redis
-	websocket_state.subscribe((state_value) => {
-		if (state_value === WebSocket.OPEN) {
-			if (animation_request_sent) {
-				return;
-			}
+	const derivedStore = derived(
+		[diva, websocket_state],
+		([_diva, _websocket_state]) => {
+			return [_diva, _websocket_state];
+		},
+	);
 
-			const animation_list = [];
+	derivedStore.subscribe(([_diva, _websocket_state]) => {
+		// when websocket is connected, and diva is loaded
+		// request the animation data needed in this component from redis
+		// make only send request once
 
-			for (let i = 0; i < animation_required.length; i++) {
-				const animation = animation_required[i];
-				animation_list.push(animation.name);
-			}
+		if (!_diva || typeof _diva !== "object" || _diva.isObject3D !== true) {
+			// diva is not ready, do nothing
+			return;
+		}
 
-			// when websocket is connected, request the animation data needed in this component
-			wsClient.sendMessage("redis://" + animation_list.join(","));
+		if (_websocket_state !== WebSocket.OPEN) {
+			// websocket is not ready, do nothing
+			return;
+		}
 
-			animation_request_sent = true;
+		if (animation_request_sent) {
+			return;
+		}
+
+		console.log("diva and websocket ready, start send animation request");
+
+		const animation_list = [];
+
+		for (let i = 0; i < animation_required.length; i++) {
+			const animation = animation_required[i];
+			animation_list.push(animation.name);
+		}
+
+		// when websocket is connected, request the animation data needed in this component
+		wsClient.sendMessage("redis://" + animation_list.join(","));
+
+		console.log(
+			"request animation data from redis",
+			"redis://" + animation_list.join(","),
+		);
+
+		animation_request_sent = true;
+	});
+
+	animation_data.subscribe((data) => {
+		// check if all animation data is ready
+		const animation_data_ready = animation_required.every((animation) => {
+			return data[animation.name] ? true : false;
+		});
+
+		if (animation_data_ready) {
+			console.log("animation data ready, send to animation_queue");
+			// update animation_queue, it will trigger watch in Scene.svelte
+			animation_queue.set(animation_required);
 		}
 	});
 

@@ -133,9 +133,13 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWebSocket {
                             println!("fetched data from redis, size {}", value.as_bytes().len());
 
                             // Concatenation here:
-                            let message = format!("{}::{}", animation_name, value);
+                            let message = format!("anim::{}::{}", animation_name, value);
+
+                            let msg_len = message.as_bytes().len();
 
                             ctx.text(message); // Send the concatenated message
+
+                            println!("send messahe to client, size {}", msg_len);
                         }
                     } else {
                         // Handle the case where the connection is not established

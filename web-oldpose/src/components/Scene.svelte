@@ -185,6 +185,8 @@
 	 * if yes, do nothing
 	 */
 	animation_queue.subscribe((a_queue) => {
+		console.log("animation_queue changed", a_queue);
+
 		// no animation in queue, do nothing
 		if (a_queue.length === 0) {
 			return;
@@ -193,6 +195,7 @@
 		if (diva_action && diva_action.isRunning()) {
 			return;
 		}
+
 		// diva is not ready, do nothing
 		if (!diva_mixer) {
 			return;
@@ -205,10 +208,12 @@
 		const animation_name = a_queue[0].name;
 		const animation_repeat = a_queue[0].repeat;
 
+		console.log("start animation", animation_name, animation_repeat);
+
 		diva_mixer.stopAllAction();
 
 		// play the first animation in queue, the animation_data should be prepared before hand
-		const animation_json = JSON.parse(animation_data[animation_name]);
+		const animation_json = JSON.parse($animation_data[animation_name]);
 
 		const animation_clip = THREE.AnimationClip.parse(animation_json);
 

@@ -1,13 +1,23 @@
+let instance;
+
 export default class WebSocketClient {
 	constructor() {
+
+		// make it a singleton, so we only have 1 threejs scene
+		if (instance) {
+			return instance;
+		}
+
 		this.socket = null;
-		this.onConnect = () => {};
-		this.onMessage = () => {}; // Define empty default event handlers
-		this.onError = () => {};
-		this.onClose = () => {};
+		this.onConnect = () => { };
+		this.onMessage = () => { }; // Define empty default event handlers
+		// this.onError = () => { };
+		// this.onClose = () => { };
+
+		instance = this;
 	}
 
-	connect(url) {
+	connect (url) {
 		this.socket = new WebSocket(url);
 
 		// Set the binaryType property to send binary data
@@ -22,6 +32,7 @@ export default class WebSocketClient {
 		}, 10000);
 
 		this.socket.onopen = () => {
+			console.log("websocket connected, state change to", this.socket.readyState);
 			this.onConnect(this.socket.readyState); // Call user-defined onConnect handler
 		};
 
@@ -31,16 +42,16 @@ export default class WebSocketClient {
 
 		this.socket.onerror = (error) => {
 			console.error("WebSocket error:", error);
-			this.onError(error); // Call user-defined onError handler
+			// this.onError(error); // Call user-defined onError handler
 		};
 
 		this.socket.onclose = (event) => {
 			console.log("WebSocket closed:", event.code, event.reason);
-			this.onClose(event); // Call user-defined onClose handler
+			// this.onClose(event); // Call user-defined onClose handler
 		};
 	}
 
-	sendMessage(message) {
+	sendMessage (message) {
 		if (this.socket.readyState === WebSocket.OPEN) {
 			this.socket.send(message);
 		} else {
@@ -48,7 +59,7 @@ export default class WebSocketClient {
 		}
 	}
 
-	close() {
+	close () {
 		if (this.socket) {
 			this.socket.close();
 			this.socket = null;
