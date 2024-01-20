@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 export const SceneProperties = {
-	camera_height: 60,
+	camera_height: 0,
 	camera_far_z: 200,
 };
 
@@ -68,15 +68,24 @@ export default class ThreeScene {
 
 		this.scene.background = new THREE.Color(0xcccccc);
 
-		this.light = new THREE.DirectionalLight(0xffffff, 1);
-		this.light.position.set(0, 100, 100);
-		this.light.castShadow = true;
+		const direct_light = new THREE.DirectionalLight(0xffffff, 1);
+		direct_light.position.set(0, 100, 100);
+		direct_light.castShadow = true;
 
-		this.light.target = new THREE.Object3D();
-		this.light.target.position.set(0, 0, -100);
+		direct_light.target = new THREE.Object3D();
+		direct_light.target.position.set(0, 0, 0);
 
-		this.scene.add(this.light);
-		this.scene.add(this.light.target);
+		this.scene.add(direct_light);
+		this.scene.add(direct_light.target);
+
+		// // create a spot light, and place it at (0, 100, 0)
+		// const spot_light = new THREE.SpotLight(0xffffff, 1);
+
+		// spot_light.position.set(0, 0, 0);
+
+		// spot_light.castShadow = true;
+
+		// this.scene.add(spot_light);
 
 		// env fog
 		// this.scene.fog = new THREE.Fog(0x000000, 50, 200);

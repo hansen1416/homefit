@@ -79,24 +79,6 @@
 	});
 
 	/**
-	 * Out of onMount, beforeUpdate, afterUpdate and onDestroy,
-	 * this is the only one that runs inside a server-side component.
-	 */
-	onDestroy(() => {
-		cancelAnimationFrame(animation_pointer);
-
-		diva_mixer.stopAllAction();
-
-		diva_mixer.removeEventListener("finished", () => {});
-
-		threeScene.dispose();
-
-		diva_mixer = undefined;
-
-		diva_action = undefined;
-	});
-
-	/**
 	 *
 	 * @param {Array<{x: number, y: number, z: number, visibility: number}>} keypoints3D
 	 */
@@ -106,7 +88,7 @@
 		}
 	}
 
-	scenery.subscribe((scenery) => {
+	const unsubscribe_scenery = scenery.subscribe((scenery) => {
 		if (!threeScene) {
 			return;
 		}
@@ -124,9 +106,11 @@
 		scenery.name = "scenery";
 
 		threeScene.scene.add(scenery);
+
+		console.log("add scenery to scene");
 	});
 
-	diva.subscribe((diva) => {
+	const unsubscribe_diva = diva.subscribe((diva) => {
 		if (!threeScene) {
 			return;
 		}
@@ -156,7 +140,7 @@
 		threeScene.scene.add(diva);
 	});
 
-	shadow.subscribe((shadow) => {
+	const unsubscribe_shadow = shadow.subscribe((shadow) => {
 		if (!threeScene) {
 			return;
 		}
@@ -184,7 +168,7 @@
 	 * if no, play the first animation
 	 * if yes, do nothing
 	 */
-	animation_queue.subscribe((a_queue) => {
+	const unsubscribe_animation_queue = animation_queue.subscribe((a_queue) => {
 		console.log("animation_queue changed", a_queue);
 
 		// no animation in queue, do nothing
@@ -233,6 +217,26 @@
 		diva_action.play();
 
 		console.log("play animation", animation_name);
+	});
+
+	/**
+	 * Out of onMount, beforeUpdate, afterUpdate and onDestroy,
+	 * this is the only one that runs inside a server-side component.
+	 */
+	onDestroy(() => {
+		cancelAnimationFrame(animation_pointer);
+
+		diva_mixer.stopAllAction();
+
+		diva_mixer.removeEventListener("finished", () => {});
+
+		threeScene.dispose();
+
+		// unsubscribe all stores
+		unsubscribe_scenery();
+		unsubscribe_diva();
+		unsubscribe_shadow();
+		unsubscribe_animation_queue();
 	});
 </script>
 

@@ -42,8 +42,18 @@
 			loadFBX("fbx/taunt.fbx"),
 			loadGLTF("glb/vr_exhibition_gallery_baked.glb"),
 		])
-			.then(([fbx0, room]) => {
-				diva.set(fbx0);
+			.then(([fbx, glb]) => {
+				diva.set(fbx);
+
+				const room = glb.scene;
+
+				// scale room up by 20
+				room.scale.set(40, 40, 40);
+				// set room position to 10, 0, 0
+				room.position.set(0, 0, -500);
+				// rotate room 90 degree along z axis
+				room.rotation.set(0, Math.PI / -2, 0);
+
 				scenery.set(room);
 			})
 			.catch((err) => {
@@ -51,55 +61,61 @@
 			});
 	});
 
-	onDestroy(() => {});
-
-	const derivedStore = derived(
+	let _derived_store = derived(
 		[diva, websocket_state],
 		([_diva, _websocket_state]) => {
 			return [_diva, _websocket_state];
 		},
 	);
 
-	derivedStore.subscribe(([_diva, _websocket_state]) => {
-		// when websocket is connected, and diva is loaded
-		// request the animation data needed in this component from redis
-		// make only send request once
+	const unsubscribe_derived_store = _derived_store.subscribe(
+		([_diva, _websocket_state]) => {
+			// when websocket is connected, and diva is loaded
+			// request the animation data needed in this component from redis
+			// make only send request once
 
-		if (!_diva || typeof _diva !== "object" || _diva.isObject3D !== true) {
-			// diva is not ready, do nothing
-			return;
-		}
+			if (
+				!_diva ||
+				typeof _diva !== "object" ||
+				_diva.isObject3D !== true
+			) {
+				// diva is not ready, do nothing
+				return;
+			}
 
-		if (_websocket_state !== WebSocket.OPEN) {
-			// websocket is not ready, do nothing
-			return;
-		}
+			if (_websocket_state !== WebSocket.OPEN) {
+				// websocket is not ready, do nothing
+				return;
+			}
 
-		if (animation_request_sent) {
-			return;
-		}
+			if (animation_request_sent) {
+				return;
+			}
 
-		console.log("diva and websocket ready, start send animation request");
+			console.log(
+				"diva and websocket ready, start send animation request",
+			);
 
-		const animation_list = [];
+			const animation_list = [];
 
-		for (let i = 0; i < animation_required.length; i++) {
-			const animation = animation_required[i];
-			animation_list.push(animation.name);
-		}
+			for (let i = 0; i < animation_required.length; i++) {
+				const animation = animation_required[i];
+				animation_list.push(animation.name);
+			}
 
-		// when websocket is connected, request the animation data needed in this component
-		wsClient.sendMessage("redis://" + animation_list.join(","));
+			// when websocket is connected, request the animation data needed in this component
+			wsClient.sendMessage("redis://" + animation_list.join(","));
 
-		console.log(
-			"request animation data from redis",
-			"redis://" + animation_list.join(","),
-		);
+			console.log(
+				"request animation data from redis",
+				"redis://" + animation_list.join(","),
+			);
 
-		animation_request_sent = true;
-	});
+			animation_request_sent = true;
+		},
+	);
 
-	animation_data.subscribe((data) => {
+	const unsubscribe_animation_data = animation_data.subscribe((data) => {
 		// check if all animation data is ready
 		const animation_data_ready = animation_required.every((animation) => {
 			return data[animation.name] ? true : false;
@@ -112,7 +128,7 @@
 		}
 	});
 
-	animation_queue.subscribe((a_queue) => {
+	const unsubscribe_animation_queue = animation_queue.subscribe((a_queue) => {
 		if (a_queue.length === 0) {
 			if (animation_played) {
 				// when there is animation palyed, and the queue empty render menu component
@@ -127,6 +143,13 @@
 				text_bubble = current_animation.message;
 			}
 		}
+	});
+
+	onDestroy(() => {
+		// unsubscribe all stores
+		unsubscribe_derived_store();
+		unsubscribe_animation_data();
+		unsubscribe_animation_queue();
 	});
 </script>
 

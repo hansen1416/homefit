@@ -24,7 +24,7 @@
 
 		typedInstance.strings = [text];
 
-		console.log("text changed to " + typedInstance.strings);
+		console.log('text changed to "' + typedInstance.strings + '"');
 
 		typedInstance.start();
 	}
