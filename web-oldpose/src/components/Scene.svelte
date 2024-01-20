@@ -1,15 +1,16 @@
 <script>
 	import { onDestroy, onMount } from "svelte";
 	import * as THREE from "three";
+	import _ from "lodash";
 	import ThreeScene from "../lib/ThreeScene";
 	import Stats from "three/examples/jsm/libs/stats.module.js";
 	import { invokeCamera } from "../utils/ropes";
 	import PlayerController from "../lib/PlayerController";
 	import PoseDetector from "../lib/PoseDetector";
-	import animation_queue from "../store/timelineStore";
+
+	import animation_queue from "../store/animationQueueStore";
 	import animation_data from "../store/animationDataStore";
 	import { diva, shadow, scenery } from "../store/archetypeStore";
-	import _ from "lodash";
 
 	/** @type {HTMLVideoElement} */
 	let video;

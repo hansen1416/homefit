@@ -5,9 +5,8 @@
 	import Scene from "./components/Scene.svelte";
 	import Home from "./routes/Home.svelte";
 	import Gym from "./routes/Gym.svelte";
-	import _ from "lodash";
 
-	import { websocket_state } from "./store/websocketStore";
+	import websocket_state from "./store/websocketStore";
 	import animation_data from "./store/animationDataStore";
 
 	let socket = new WebSocketClient();

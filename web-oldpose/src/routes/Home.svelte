@@ -7,10 +7,11 @@
 	import Menu from "../components/Menu.svelte";
 
 	import { derived } from "svelte/store";
-	import { websocket_state } from "../store/websocketStore";
 	import { diva, scenery } from "../store/archetypeStore";
-	import animation_queue from "../store/timelineStore";
+	import websocket_state from "../store/websocketStore";
+	import animation_queue from "../store/animationQueueStore";
 	import animation_data from "../store/animationDataStore";
+
 	// websocket client
 	let wsClient = new WebSocketClient();
 	// make sure animation data only send once dispite of websocket state change
