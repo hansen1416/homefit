@@ -40,8 +40,6 @@ export default class ThreeScene {
 		// make it a singleton, so we only have 1 threejs scene
 		if (instance) {
 			return instance;
-		} else {
-			instance = this;
 		}
 
 		this.scene = new THREE.Scene();
@@ -78,15 +76,6 @@ export default class ThreeScene {
 		this.scene.add(direct_light);
 		this.scene.add(direct_light.target);
 
-		// // create a spot light, and place it at (0, 100, 0)
-		// const spot_light = new THREE.SpotLight(0xffffff, 1);
-
-		// spot_light.position.set(0, 0, 0);
-
-		// spot_light.castShadow = true;
-
-		// this.scene.add(spot_light);
-
 		// env fog
 		// this.scene.fog = new THREE.Fog(0x000000, 50, 200);
 
@@ -107,6 +96,8 @@ export default class ThreeScene {
 		this.controls.maxDistance = 800;
 
 		this.renderer.setSize(width, height);
+
+		instance = this;
 	}
 
 	dispose () {
