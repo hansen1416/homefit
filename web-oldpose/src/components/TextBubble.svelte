@@ -1,40 +1,54 @@
 <script>
 	import { onDestroy, onMount } from "svelte";
 	import Typed from "typed.js";
-
-	export let text;
+	import conversation from "../store/conversationStore";
 
 	let typedInstance;
 
+	let show_bubble = false;
+
 	onMount(() => {
 		typedInstance = new Typed("#text_bubble", {
-			strings: [text],
+			strings: [""],
 			//   typeSpeed: 50,
 			//   loop: false,
 		});
+	});
+
+	const unsubscribe_conversation = conversation.subscribe((value) => {
+		if (typedInstance) {
+			typedInstance.destroy();
+
+			if (value && value instanceof Array) {
+				show_bubble = true;
+
+				typedInstance = new Typed("#text_bubble", {
+					strings: value,
+					//   typeSpeed: 50,
+					//   loop: false,
+				});
+
+				console.log('text changed to "' + typedInstance.strings + '"');
+
+				typedInstance.start();
+			} else {
+				show_bubble = false;
+			}
+		}
 	});
 
 	onDestroy(() => {
 		typedInstance.destroy();
+
+		unsubscribe_conversation();
 	});
-
-	$: if (typedInstance && text) {
-		// each time text changes, destroy the old instance and create a new one
-		typedInstance.destroy();
-
-		typedInstance = new Typed("#text_bubble", {
-			strings: [text],
-			//   typeSpeed: 50,
-			//   loop: false,
-		});
-
-		console.log('text changed to "' + typedInstance.strings + '"');
-
-		typedInstance.start();
-	}
 </script>
 
-<div id="text_bubble" class="text-bubble"></div>
+<div
+	id="text_bubble"
+	class="text-bubble"
+	style:visibility={show_bubble ? "visible" : "hidden"}
+></div>
 
 <style>
 	.text-bubble {

@@ -1,8 +1,9 @@
 <script>
 	import { Router, Route } from "svelte-routing";
 	import WebSocketClient from "./lib/WebSocketClient";
-	import ExtractAnimationData from "./routes/ExtractAnimationData.svelte";
 	import Scene from "./components/Scene.svelte";
+	import TextBubble from "./components/TextBubble.svelte";
+	import ExtractAnimationData from "./routes/ExtractAnimationData.svelte";
 	import Home from "./routes/Home.svelte";
 	import Gym from "./routes/Gym.svelte";
 
@@ -52,6 +53,8 @@
 <Router>
 	<div>
 		<Scene />
+		<TextBubble />
+
 		<Route path="/" component={Home} />
 		<Route path="/extract" component={ExtractAnimationData} />
 		<Route path="/gym/:id" let:params>

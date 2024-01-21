@@ -193,7 +193,12 @@
 		const animation_name = a_queue[0].name;
 		const animation_repeat = a_queue[0].repeat;
 
-		console.log("start animation", animation_name, animation_repeat);
+		console.log(
+			"start animation: ",
+			animation_name,
+			", repeat:",
+			animation_repeat,
+		);
 
 		diva_mixer.stopAllAction();
 

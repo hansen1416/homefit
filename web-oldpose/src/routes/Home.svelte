@@ -2,7 +2,6 @@
 	import _ from "lodash";
 	import { onDestroy, onMount } from "svelte";
 	import WebSocketClient from "../lib/WebSocketClient";
-	import TextBubble from "../components/TextBubble.svelte";
 	import Menu from "../components/Menu.svelte";
 	import { loadDiva, loadScenery } from "../utils/mediaLoader";
 
@@ -11,6 +10,7 @@
 	import websocket_state from "../store/websocketStore";
 	import animation_queue from "../store/animationQueueStore";
 	import animation_data from "../store/animationDataStore";
+	import conversation from "../store/conversationStore";
 
 	// websocket client
 	let wsClient = new WebSocketClient();
@@ -128,8 +128,9 @@
 			// check is current animation item has a `message` field, if yes, render TextBubble component
 			const current_animation = a_queue[0];
 			if (current_animation.message) {
-				// render TextBubble component
-				text_bubble = current_animation.message;
+				conversation.set([current_animation.message]);
+			} else {
+				conversation.set(null);
 			}
 		}
 	});
@@ -139,14 +140,10 @@
 		unsubscribe_derived_store();
 		unsubscribe_animation_data();
 		unsubscribe_animation_queue();
+
+		conversation.set(null);
 	});
 </script>
-
-<!-- render TextBubble on text_bubble -->
-{#if text_bubble}
-	<!-- todo, move to App -->
-	<TextBubble text={text_bubble} />
-{/if}
 
 {#if show_menu}
 	<Menu />
