@@ -16,8 +16,6 @@
 	let wsClient = new WebSocketClient();
 	// make sure animation data only send once dispite of websocket state change
 	let animation_request_sent = false;
-	// conversation text from diva
-	let text_bubble = "";
 	// show menu when animation queue is empty
 	let show_menu = false;
 	// make sure menu only show when animation played, not when page first loaded
@@ -81,9 +79,7 @@
 				return;
 			}
 
-			console.log(
-				"diva and websocket ready, start send animation request",
-			);
+			console.log("diva and websocket ready, send animation request");
 
 			const animation_list = [];
 
@@ -92,13 +88,12 @@
 				animation_list.push(animation.name);
 			}
 
-			// when websocket is connected, request the animation data needed in this component
-			wsClient.sendMessage("redis://" + animation_list.join(","));
+			const msg = "anim::" + animation_list.join(",");
 
-			console.log(
-				"request animation data from redis",
-				"redis://" + animation_list.join(","),
-			);
+			// when websocket is connected, request the animation data needed in this component
+			wsClient.sendMessage(msg);
+
+			console.log("request animation data from redis msg: " + msg);
 
 			animation_request_sent = true;
 		},

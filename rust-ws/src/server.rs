@@ -115,10 +115,10 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWebSocket {
 
                 // Access the Redis connection
 
-                const REDIS_PREFIX: &str = "redis://";
+                const ANIM_PREFIX: &str = "anim::";
 
-                if text.starts_with(REDIS_PREFIX) {
-                    let redis_key = &text[REDIS_PREFIX.len()..];
+                if text.starts_with(ANIM_PREFIX) {
+                    let redis_key = &text[ANIM_PREFIX.len()..];
 
                     let animation_names: Vec<&str> = redis_key.split(",").collect();
 
