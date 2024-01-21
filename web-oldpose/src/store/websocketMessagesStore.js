@@ -1,6 +1,5 @@
 import { writable } from "svelte/store";
-
-// Initialize with an empty array
+// message received from websocket
 const websocket_messages = writable([]);
 
 export default websocket_messages;

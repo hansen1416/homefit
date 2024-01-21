@@ -36,51 +36,6 @@
 		},
 	];
 
-	// function loadDiva() {
-	// 	if ($diva && typeof $diva === "object" && $diva.isObject3D === true) {
-	// 		return Promise.resolve($diva);
-	// 	}
-
-	// 	return new Promise((resolve, reject) => {
-	// 		loadFBX("fbx/taunt.fbx")
-	// 			.then((fbx) => {
-	// 				resolve(fbx);
-	// 			})
-	// 			.catch((err) => {
-	// 				reject(err);
-	// 			});
-	// 	});
-	// }
-
-	// function loadScenery() {
-	// 	if (
-	// 		$scenery &&
-	// 		typeof $scenery === "object" &&
-	// 		$scenery.isObject3D === true
-	// 	) {
-	// 		return Promise.resolve($scenery);
-	// 	}
-
-	// 	return new Promise((resolve, reject) => {
-	// 		loadGLTF("glb/vr_exhibition_gallery_baked.glb")
-	// 			.then((glb) => {
-	// 				const room = glb.scene;
-
-	// 				// scale room up by 20
-	// 				room.scale.set(40, 40, 40);
-	// 				// set room position to 10, 0, 0
-	// 				room.position.set(0, 0, -500);
-	// 				// rotate room 90 degree along z axis
-	// 				room.rotation.set(0, Math.PI / -2, 0);
-
-	// 				resolve(room);
-	// 			})
-	// 			.catch((err) => {
-	// 				reject(err);
-	// 			});
-	// 	});
-	// }
-
 	onMount(() => {
 		// wsClient = $websocket;
 		// we need store to keep diva and shadow
