@@ -10,6 +10,7 @@
 
 	import animation_queue from "../store/animationQueueStore";
 	import animation_data from "../store/animationDataStore";
+	import conversation from "../store/conversationStore";
 	import { diva, shadow, scenery } from "../store/archetypeStore";
 
 	/** @type {HTMLVideoElement} */
@@ -163,67 +164,93 @@
 		threeScene.scene.add(shadow);
 	});
 
+	// we need to watch both animation_queue and animation_data, make sure they both complete
+	const _derived_queue_data = derived(
+		[animation_queue, animation_data],
+		([_animation_queue, _animation_data]) => {
+			return [_animation_queue, _animation_data];
+		},
+	);
+
 	/**
 	 * watch animation_queue, when it changes,
+	 * check all the resouces needed for the animation is ready
 	 * check whether animation in play
 	 * if no, play the first animation
 	 * if yes, do nothing
 	 */
-	const unsubscribe_animation_queue = animation_queue.subscribe((a_queue) => {
-		console.log("animation_queue changed", a_queue);
+	const unsubscribe_queue_data = _derived_queue_data.subscribe(
+		([_animation_queue, _animation_data]) => {
+			// when animation_queue and animation_data are both ready
+			// we can start to play the animation
+			if (
+				!_animation_queue ||
+				!_animation_data ||
+				_animation_queue.length === 0
+			) {
+				// animation_queue or animation_data is not ready, do nothing
+				return;
+			}
 
-		// no animation in queue, do nothing
-		if (a_queue.length === 0) {
-			return;
-		}
-		// another animation is playing, do nothing
-		if (diva_action && diva_action.isRunning()) {
-			return;
-		}
+			// another animation is playing, do nothing
+			if (diva_action && diva_action.isRunning()) {
+				return;
+			}
 
-		// diva is not ready, do nothing
-		if (!diva_mixer) {
-			return;
-		}
+			// diva is not ready, do nothing
+			if (!diva_mixer) {
+				return;
+			}
 
-		if (!threeScene) {
-			return;
-		}
+			if (!threeScene) {
+				return;
+			}
 
-		const animation_name = a_queue[0].name;
-		const animation_repeat = a_queue[0].repeat;
+			const animation_name = _animation_queue[0].name;
+			const animation_repeat = _animation_queue[0].repeat;
+			const animation_text = _animation_queue[0].text;
 
-		console.log(
-			"start animation: ",
-			animation_name,
-			", repeat:",
-			animation_repeat,
-		);
+			if (!_animation_data[animation_name]) {
+				// animation data is not ready, do nothing
+				return;
+			}
 
-		diva_mixer.stopAllAction();
+			// check is current animation item has a `message` field, if yes, render TextBubble component
+			if (animation_text) {
+				conversation.set([animation_text]);
+			} else {
+				conversation.set(null);
+			}
 
-		// play the first animation in queue, the animation_data should be prepared before hand
-		const animation_json = JSON.parse($animation_data[animation_name]);
+			console.log(
+				`start animation: ${animation_name}, repeat: ${animation_repeat}`,
+			);
 
-		const animation_clip = THREE.AnimationClip.parse(animation_json);
+			diva_mixer.stopAllAction();
 
-		diva_action = diva_mixer.clipAction(animation_clip);
+			// play the first animation in queue, the animation_data should be prepared before hand
+			const animation_json = JSON.parse(_animation_data[animation_name]);
 
-		diva_action.reset();
+			const animation_clip = THREE.AnimationClip.parse(animation_json);
 
-		diva_action.setLoop(THREE.LoopRepeat, animation_repeat);
+			diva_action = diva_mixer.clipAction(animation_clip);
 
-		// keep model at the position where it stops
-		diva_action.clampWhenFinished = true;
+			diva_action.reset();
 
-		diva_action.enabled = true;
+			diva_action.setLoop(THREE.LoopRepeat, animation_repeat);
 
-		// diva_action.fadeIn(0.5);
+			// keep model at the position where it stops
+			diva_action.clampWhenFinished = true;
 
-		diva_action.play();
+			diva_action.enabled = true;
 
-		console.log("play animation", animation_name);
-	});
+			// diva_action.fadeIn(0.5);
+
+			diva_action.play();
+
+			console.log("play animation", animation_name);
+		},
+	);
 
 	/**
 	 * Out of onMount, beforeUpdate, afterUpdate and onDestroy,
@@ -242,7 +269,7 @@
 		unsubscribe_scenery();
 		unsubscribe_diva();
 		unsubscribe_shadow();
-		unsubscribe_animation_queue();
+		unsubscribe_queue_data();
 	});
 </script>
 

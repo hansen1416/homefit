@@ -9,6 +9,7 @@
 
 	import websocket_state from "./store/websocketStore";
 	import animation_data from "./store/animationDataStore";
+	import animation_queue from "./store/animationQueueStore";
 
 	let socket = new WebSocketClient();
 	// When you write $websocket, you're essentially saying, "Get the current value from the store named websocket."
@@ -36,17 +37,24 @@
 		// first split the message
 		let [category, name, data] = msg.split("::");
 
-		// check if the message is for animation data
-		if (category === "anim") {
+		if (category === "am") {
+			// 'am' is animation data for a single animation
 			console.log("received animation data", name);
 
-			// update animation_data
-			const existing_data = $animation_data;
+			animation_data.update((old_data) => {
+				return { ...old_data, [name]: data };
+			});
+		} else if (category === "amq") {
+			// 'amq' is animation queue, a list of animation metadata
+			console.log("received animation queue", name);
 
-			existing_data[name] = data;
-
-			animation_data.set(existing_data);
+			// update animation_queue
+			animation_queue.update((old_queue) => {
+				return [...old_queue, ...JSON.parse(data)];
+			});
 		}
+
+		console.log("received unknown message", msg);
 	};
 </script>
 

@@ -111,42 +111,64 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWebSocket {
                 self.hb = Instant::now();
             }
             Ok(ws::Message::Text(text)) => {
-                // Trigger file chunk sending based on a text message (replace with your trigger)
-
                 // Access the Redis connection
+                if let Some(con) = &mut self.redis_con {
+                    // Access and use each part here
+                    if text.contains("::") {
+                        let delimiter_index = text.find("::").unwrap();
 
-                const ANIM_PREFIX: &str = "anim::";
+                        let prefix = &text[..delimiter_index + 2]; // includes delimiters
+                        let suffix = &text[delimiter_index + 2..];
 
-                if text.starts_with(ANIM_PREFIX) {
-                    let redis_key = &text[ANIM_PREFIX.len()..];
+                        match prefix {
+                            "am::" => {
+                                let redis_key = suffix;
 
-                    let animation_names: Vec<&str> = redis_key.split(",").collect();
+                                let value: String = con.get(&redis_key).unwrap();
 
-                    if let Some(con) = &mut self.redis_con {
-                        for animation_name in animation_names {
-                            println!("animation name: {}", animation_name);
+                                println!(
+                                    "fetched data from redis, size {}",
+                                    value.as_bytes().len()
+                                );
 
-                            // Access and use each part here
-                            // Perform Redis operations as needed
-                            let value: String = con.get(&animation_name).unwrap();
+                                // Concatenation here:
+                                let message = format!("am::{}::{}", redis_key, value);
 
-                            println!("fetched data from redis, size {}", value.as_bytes().len());
+                                let msg_len = message.as_bytes().len();
 
-                            // Concatenation here:
-                            let message = format!("anim::{}::{}", animation_name, value);
+                                ctx.text(message); // Send the concatenated message
 
-                            let msg_len = message.as_bytes().len();
+                                println!("send messahe to client, size {}", msg_len);
+                            }
+                            "amq::" => {
+                                let redis_key = suffix;
 
-                            ctx.text(message); // Send the concatenated message
+                                let value: String = con.get(&redis_key).unwrap();
 
-                            println!("send messahe to client, size {}", msg_len);
+                                println!(
+                                    "fetched data from redis, size {}",
+                                    value.as_bytes().len()
+                                );
+
+                                // Concatenation here:
+                                let message = format!("amq::{}::{}", redis_key, value);
+
+                                let msg_len = message.as_bytes().len();
+
+                                ctx.text(message); // Send the concatenated message
+
+                                println!("send messahe to client, size {}", msg_len);
+                            }
+                            _ => {
+                                println!("received unknown text {}", text);
+                            }
                         }
                     } else {
-                        // Handle the case where the connection is not established
-                        println!("Redis connection not available");
+                        println!("received unknown text {}", text);
                     }
                 } else {
-                    println!("received text {}", text)
+                    // Handle the case where the connection is not established
+                    println!("Redis connection not available");
                 }
             }
             Ok(ws::Message::Binary(bin)) => ctx.binary(bin),

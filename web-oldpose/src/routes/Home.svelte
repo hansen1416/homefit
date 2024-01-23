@@ -9,8 +9,6 @@
 	import { diva, scenery } from "../store/archetypeStore";
 	import websocket_state from "../store/websocketStore";
 	import animation_queue from "../store/animationQueueStore";
-	import animation_data from "../store/animationDataStore";
-	import conversation from "../store/conversationStore";
 
 	// websocket client
 	let wsClient = new WebSocketClient();
@@ -20,19 +18,6 @@
 	let show_menu = false;
 	// make sure menu only show when animation played, not when page first loaded
 	let animation_played = false;
-
-	const animation_required = [
-		{
-			name: "greeting",
-			repeat: 1,
-			message: "Hello, I am Anya, how may I assisst you today?",
-		},
-		{
-			name: "pointing-forward",
-			repeat: 1,
-			message: "Here are available workout options.",
-		},
-	];
 
 	onMount(() => {
 		// wsClient = $websocket;
@@ -79,16 +64,7 @@
 				return;
 			}
 
-			console.log("diva and websocket ready, send animation request");
-
-			const animation_list = [];
-
-			for (let i = 0; i < animation_required.length; i++) {
-				const animation = animation_required[i];
-				animation_list.push(animation.name);
-			}
-
-			const msg = "anim::" + animation_list.join(",");
+			const msg = "amq::greeting";
 
 			// when websocket is connected, request the animation data needed in this component
 			wsClient.sendMessage(msg);
@@ -99,19 +75,6 @@
 		},
 	);
 
-	const unsubscribe_animation_data = animation_data.subscribe((data) => {
-		// check if all animation data is ready
-		const animation_data_ready = animation_required.every((animation) => {
-			return data[animation.name] ? true : false;
-		});
-
-		if (animation_data_ready) {
-			console.log("animation data ready, send to animation_queue");
-			// update animation_queue, it will trigger watch in Scene.svelte
-			animation_queue.set(animation_required);
-		}
-	});
-
 	const unsubscribe_animation_queue = animation_queue.subscribe((a_queue) => {
 		if (a_queue.length === 0) {
 			if (animation_played) {
@@ -120,23 +83,13 @@
 			}
 		} else {
 			animation_played = true;
-			// check is current animation item has a `message` field, if yes, render TextBubble component
-			const current_animation = a_queue[0];
-			if (current_animation.message) {
-				conversation.set([current_animation.message]);
-			} else {
-				conversation.set(null);
-			}
 		}
 	});
 
 	onDestroy(() => {
 		// unsubscribe all stores
 		unsubscribe_derived_store();
-		unsubscribe_animation_data();
 		unsubscribe_animation_queue();
-
-		conversation.set(null);
 	});
 </script>
 
