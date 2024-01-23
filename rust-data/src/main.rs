@@ -1,9 +1,9 @@
 use log::{ info };
 use std::fs;
 use std::path::Path;
-// use serde::Deserialize;
+use serde::Serialize;
 use serde_json;
-use redis::{ Client, Commands };
+use redis::{ Client, Commands, Connection };
 
 // #[derive(Deserialize)]
 // struct Animation {
@@ -22,19 +22,63 @@ use redis::{ Client, Commands };
 //     r#type: String, // Use r# to avoid "type" keyword clash
 // }
 
+#[derive(Serialize)]
+struct AnimationMetadata {
+    name: String,
+    repeat: i32,
+    text: Option<String>,
+}
+
+fn serialize_json_list(list: &[AnimationMetadata]) -> Vec<String> {
+    list.iter()
+        .map(|obj| serde_json::to_string(obj).unwrap())
+        .collect()
+}
+
+fn save_to_redis(client: &mut Connection, list: &[String], list_key: &str) {
+    for json_string in list {
+        client
+            .rpush::<&&str, &std::string::String, ()>(&list_key, json_string)
+            .expect("RPUSH failed");
+    }
+}
+
 fn main() {
     // read json data from file, and save it to Redis
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("debug"));
 
     info!("Logger is ready!");
 
-    let data_dir = Path::new("./data");
-
-    let paths = fs::read_dir(data_dir).expect("data_dir should be a directory");
-
     let client = Client::open("redis://127.0.0.1:6379").expect("Redis connection failed");
 
     let mut con = client.get_connection().expect("Failed to get Redis connection");
+
+    // save list data to Redis
+    let list = vec![
+        AnimationMetadata {
+            name: "yoga-starting".to_string(),
+            repeat: 0,
+            text: Some("Hi there, how may I assist you today".to_string()),
+        },
+        AnimationMetadata {
+            name: "yoga-starting".to_string(),
+            repeat: 0,
+            text: None,
+        }
+    ];
+
+    let serialized_list = serialize_json_list(&list);
+
+    println!("serialized_list: {:?}", serialized_list);
+
+    let list_key = "amq:greeting";
+
+    save_to_redis(&mut con, &serialized_list, list_key);
+
+    // read json data from file, and save it to Redis
+    let data_dir = Path::new("./data");
+
+    let paths = fs::read_dir(data_dir).expect("data_dir should be a directory");
 
     for path in paths {
         let path_buf = path.unwrap().path(); // Handle potential errors
@@ -68,7 +112,8 @@ fn main() {
             .expect("Should have been able to parse the json");
 
         let animation_name = match data["name"].as_str() {
-            Some(name) => name.to_string(),
+            // prefix with "am::" to indicate animation metadata
+            Some(name) => format!("am:{}", name),
             None => panic!("Invalid data type for 'name' field"),
         };
 

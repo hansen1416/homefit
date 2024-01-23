@@ -8,6 +8,7 @@
 	import PlayerController from "../lib/PlayerController";
 	import PoseDetector from "../lib/PoseDetector";
 
+	import { derived } from "svelte/store";
 	import animation_queue from "../store/animationQueueStore";
 	import animation_data from "../store/animationDataStore";
 	import conversation from "../store/conversationStore";
