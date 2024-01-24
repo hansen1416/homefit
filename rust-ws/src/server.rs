@@ -124,16 +124,19 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWebSocket {
                 if let Some(con) = &mut self.redis_con {
                     // Access and use each part here
                     if text.contains("::") {
-                        let delimiter_index = text.find("::").unwrap();
+                        let delimiter_index = text.find(":").expect("Failed to find delimiter");
 
                         let prefix = &text[..delimiter_index + 2]; // includes delimiters
                         let suffix = &text[delimiter_index + 2..];
 
-                        match prefix {
-                            "am::" => {
-                                let redis_key = suffix;
+                        // covert text from bytestring::ByteString to &str
+                        let reids_key = suffix.as_ref();
 
-                                let value: String = con.get(&redis_key).unwrap();
+                        match prefix {
+                            "am:" => {
+                                let value: String = con
+                                    .get::<&str, String>(&reids_key)
+                                    .expect("Failed to read data from Redis");
 
                                 println!(
                                     "fetched data from redis, size {}",
@@ -141,7 +144,7 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWebSocket {
                                 );
 
                                 // Concatenation here:
-                                let message = format!("am::{}::{}", redis_key, value);
+                                let message = format!("{}::{}", reids_key, value);
 
                                 let msg_len = message.as_bytes().len();
 
@@ -149,11 +152,9 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWebSocket {
 
                                 println!("send messahe to client, size {}", msg_len);
                             }
-                            "amq::" => {
-                                let redis_key = suffix;
-
+                            "amq:" => {
                                 let value: Vec<String> = con
-                                    .lrange(&list_key, 0, -1)
+                                    .lrange(&reids_key, 0, -1)
                                     .expect("Failed to read list from Redis");
 
                                 // iterate over the list, convert string item to json object
@@ -169,8 +170,13 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWebSocket {
                                 println!("list size {}", values.len());
 
                                 // Concatenation here:
-                                let message =
-                                    format!("{}::{}", redis_key, serde_json::to_string(&values).expect("Failed to serialize list to string"););
+                                let message = format!(
+                                    "{}::{}",
+                                    reids_key,
+                                    serde_json
+                                        ::to_string(&values)
+                                        .expect("Failed to serialize list to string")
+                                );
 
                                 let msg_len = message.as_bytes().len();
 

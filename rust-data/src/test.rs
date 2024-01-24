@@ -82,10 +82,24 @@ fn read_list() {
     println!("value_string: {:?}", value_string);
 }
 
+fn read_obj() {
+    // Establish Redis connection here
+    let client = redis::Client::open("redis://127.0.0.1:6379").expect("Failed to connect to Redis");
+    let mut con = client.get_connection().expect("Failed to get Redis connection");
+
+    let redis_key = "am:yoga-starting";
+
+    let value = con.get::<&str, String>(redis_key).expect("Failed to read data from Redis");
+
+    println!("data size: {}", value.as_bytes().len());
+}
+
 fn main() {
     // save_list_to_redis();
 
-    read_list();
+    // read_list();
+
+    read_obj();
 
     // let file_path = Path::new("./data/simple.json");
 
