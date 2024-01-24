@@ -2,6 +2,8 @@ use std::time::{ Duration, Instant };
 use redis::Commands;
 use actix::prelude::*;
 use actix_web_actors::ws;
+use serde_json;
+use serde::{ Serialize, Deserialize };
 
 /// How often heartbeat pings are sent
 const HEARTBEAT_INTERVAL: Duration = Duration::from_secs(5);
@@ -16,6 +18,13 @@ pub struct MyWebSocket {
     /// otherwise we drop connection.
     hb: Instant,
     redis_con: Option<redis::Connection>,
+}
+
+#[derive(Serialize, Deserialize)]
+struct AnimationMetadata {
+    name: String,
+    repeat: i32,
+    text: Option<String>,
 }
 
 impl MyWebSocket {
@@ -143,15 +152,25 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWebSocket {
                             "amq::" => {
                                 let redis_key = suffix;
 
-                                let value: String = con.get(&redis_key).unwrap();
+                                let value: Vec<String> = con
+                                    .lrange(&list_key, 0, -1)
+                                    .expect("Failed to read list from Redis");
 
-                                println!(
-                                    "fetched data from redis, size {}",
-                                    value.as_bytes().len()
-                                );
+                                // iterate over the list, convert string item to json object
+                                let values: Vec<AnimationMetadata> = value
+                                    .iter()
+                                    .map(|json_string|
+                                        serde_json
+                                            ::from_str(json_string)
+                                            .expect("Failed to parse json string")
+                                    )
+                                    .collect();
+
+                                println!("list size {}", values.len());
 
                                 // Concatenation here:
-                                let message = format!("amq::{}::{}", redis_key, value);
+                                let message =
+                                    format!("{}::{}", redis_key, serde_json::to_string(&values).expect("Failed to serialize list to string"););
 
                                 let msg_len = message.as_bytes().len();
 

@@ -1,11 +1,11 @@
 // use log::{ info };
 // use std::fs;
 // use std::path::Path;
-use serde::Serialize;
+use serde::{ Serialize, Deserialize };
 use serde_json;
 use redis::{ Client, Commands, Connection };
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 struct AnimationMetadata {
     name: String,
     repeat: i32,
@@ -58,8 +58,34 @@ fn save_list_to_redis() {
     save_to_redis(&mut con, &serialized_list, list_key);
 }
 
+fn read_list() {
+    // Establish Redis connection here
+    let client = redis::Client::open("redis://127.0.0.1:6379").expect("Failed to connect to Redis");
+    let mut con = client.get_connection().expect("Failed to get Redis connection");
+
+    let list_key = "amq:greeting";
+
+    let value: Vec<String> = con.lrange(&list_key, 0, -1).expect("Failed to read list from Redis");
+
+    println!("value: {:?}", value);
+
+    println!("list size {}", value.len());
+
+    // iterate over the list, convert string item to json object
+    let values: Vec<AnimationMetadata> = value
+        .iter()
+        .map(|json_string| serde_json::from_str(json_string).expect("Failed to parse json string"))
+        .collect();
+
+    let value_string = serde_json::to_string(&values).expect("Failed to serialize list to string");
+
+    println!("value_string: {:?}", value_string);
+}
+
 fn main() {
-    save_list_to_redis();
+    // save_list_to_redis();
+
+    read_list();
 
     // let file_path = Path::new("./data/simple.json");
 
