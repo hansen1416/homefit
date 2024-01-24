@@ -35,7 +35,9 @@
 		}
 
 		// first split the message
-		let [category, name, data] = msg.split("::");
+		const [redis_key, data] = msg.split("::");
+
+		const [category, name] = redis_key.split(":");
 
 		if (category === "am") {
 			// 'am' is animation data for a single animation
@@ -46,15 +48,14 @@
 			});
 		} else if (category === "amq") {
 			// 'amq' is animation queue, a list of animation metadata
-			console.log("received animation queue", name);
 
 			// update animation_queue
 			animation_queue.update((old_queue) => {
 				return [...old_queue, ...JSON.parse(data)];
 			});
+		} else {
+			console.log("received unknown message", msg);
 		}
-
-		console.log("received unknown message", msg);
 	};
 </script>
 

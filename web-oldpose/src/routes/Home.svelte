@@ -64,7 +64,7 @@
 				return;
 			}
 
-			const msg = "amq::greeting";
+			const msg = "amq:greeting";
 
 			// when websocket is connected, request the animation data needed in this component
 			wsClient.sendMessage(msg);

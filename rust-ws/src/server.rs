@@ -123,14 +123,14 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWebSocket {
                 // Access the Redis connection
                 if let Some(con) = &mut self.redis_con {
                     // Access and use each part here
-                    if text.contains("::") {
+                    if text.contains(":") {
                         let delimiter_index = text.find(":").expect("Failed to find delimiter");
 
-                        let prefix = &text[..delimiter_index + 2]; // includes delimiters
-                        let suffix = &text[delimiter_index + 2..];
+                        let prefix = &text[..delimiter_index + 1]; // includes delimiters
+                        // let suffix = &text[delimiter_index + 1..];
 
                         // covert text from bytestring::ByteString to &str
-                        let reids_key = suffix.as_ref();
+                        let reids_key = text.as_ref();
 
                         match prefix {
                             "am:" => {
