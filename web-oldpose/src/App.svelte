@@ -51,6 +51,8 @@
 
 			const anim_quque = JSON.parse(data);
 
+			console.log("received animation queue", anim_quque);
+
 			// update animation_queue
 			animation_queue.update((old_queue) => {
 				return [...old_queue, ...anim_quque];
