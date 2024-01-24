@@ -91,58 +91,6 @@
 		}
 	}
 
-	const unsubscribe_scenery = scenery.subscribe((scenery) => {
-		if (!threeScene) {
-			return;
-		}
-
-		if (typeof scenery !== "object" || scenery.isObject3D !== true) {
-			// scenery is not ready, do nothing
-			return;
-		}
-
-		if (threeScene.scene.getObjectByName("scenery")) {
-			// scenery is already in the scene, do nothing
-			return;
-		}
-
-		scenery.name = "scenery";
-
-		threeScene.scene.add(scenery);
-
-		console.log("add scenery to scene");
-	});
-
-	const unsubscribe_diva = diva.subscribe((diva) => {
-		if (!threeScene) {
-			return;
-		}
-
-		if (typeof diva !== "object" || diva.isObject3D !== true) {
-			// diva is not ready, do nothing
-			return;
-		}
-
-		if (threeScene.scene.getObjectByName("diva")) {
-			// diva is already in the scene, do nothing
-			return;
-		}
-
-		diva.name = "diva";
-
-		diva_mixer = new THREE.AnimationMixer(diva);
-
-		diva_mixer.addEventListener("finished", (e) => {
-			// when one animation finished, remove the first animation from queue
-			// this will trigger the watch function on `animation_queue` below
-			animation_queue.update((a_queue) => {
-				return _.tail(a_queue);
-			});
-		});
-
-		threeScene.scene.add(diva);
-	});
-
 	const unsubscribe_shadow = shadow.subscribe((shadow) => {
 		if (!threeScene) {
 			return;
@@ -167,9 +115,9 @@
 
 	// we need to watch both animation_queue and animation_data, make sure they both complete
 	const _derived_queue_data = derived(
-		[animation_queue, animation_data],
-		([_animation_queue, _animation_data]) => {
-			return [_animation_queue, _animation_data];
+		[scenery, diva, animation_queue, animation_data],
+		([_scenery, _diva, _animation_queue, _animation_data]) => {
+			return [_scenery, _diva, _animation_queue, _animation_data];
 		},
 	);
 
@@ -181,9 +129,60 @@
 	 * if yes, do nothing
 	 */
 	const unsubscribe_queue_data = _derived_queue_data.subscribe(
-		([_animation_queue, _animation_data]) => {
+		([_scenery, _diva, _animation_queue, _animation_data]) => {
+			if (!threeScene) {
+				return;
+			}
+
+			if (
+				!_diva ||
+				typeof _diva !== "object" ||
+				_diva.isObject3D !== true
+			) {
+				// diva is not ready, do nothing
+				return;
+			}
+
+			if (
+				!_scenery ||
+				typeof _scenery !== "object" ||
+				_scenery.isObject3D !== true
+			) {
+				// scenery is not ready, do nothing
+				return;
+			}
+
+			if (!threeScene.scene.getObjectByName("diva")) {
+				// diva is already in the scene, do nothing
+				_diva.name = "diva";
+
+				diva_mixer = new THREE.AnimationMixer(_diva);
+
+				diva_mixer.addEventListener("finished", () => {
+					// when one animation finished, remove the first animation from queue
+					// this will trigger the watch function on `animation_queue` below
+					animation_queue.update((a_queue) => {
+						return _.tail(a_queue);
+					});
+				});
+
+				threeScene.scene.add(_diva);
+
+				console.log("add diva to scene");
+			}
+
+			if (!threeScene.scene.getObjectByName("scenery")) {
+				// scenery is already in the scene, do nothing
+				_scenery.name = "scenery";
+
+				threeScene.scene.add(_scenery);
+
+				console.log("add scenery to scene");
+			}
+
 			// when animation_queue and animation_data are both ready
 			// we can start to play the animation
+
 			if (
 				!_animation_queue ||
 				!_animation_data ||
@@ -260,15 +259,15 @@
 	onDestroy(() => {
 		cancelAnimationFrame(animation_pointer);
 
-		diva_mixer.stopAllAction();
+		if (diva_mixer) {
+			diva_mixer.stopAllAction();
 
-		diva_mixer.removeEventListener("finished", () => {});
+			diva_mixer.removeEventListener("finished", () => {});
+		}
 
 		threeScene.dispose();
 
 		// unsubscribe all stores
-		unsubscribe_scenery();
-		unsubscribe_diva();
 		unsubscribe_shadow();
 		unsubscribe_queue_data();
 	});

@@ -56,12 +56,12 @@ fn main() {
     // save list data to Redis
     let list = vec![
         AnimationMetadata {
-            name: "yoga-starting".to_string(),
+            name: "greeting".to_string(),
             repeat: 0,
             text: Some("Hi there, how may I assist you today".to_string()),
         },
         AnimationMetadata {
-            name: "yoga-starting".to_string(),
+            name: "pointing-forward".to_string(),
             repeat: 0,
             text: None,
         }

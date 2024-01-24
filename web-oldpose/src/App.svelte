@@ -49,9 +49,18 @@
 		} else if (category === "amq") {
 			// 'amq' is animation queue, a list of animation metadata
 
+			const anim_quque = JSON.parse(data);
+
 			// update animation_queue
 			animation_queue.update((old_queue) => {
-				return [...old_queue, ...JSON.parse(data)];
+				return [...old_queue, ...anim_quque];
+			});
+
+			// iterate through animation_queue, and request animation data
+			anim_quque.forEach((anim) => {
+				const msg = "am:" + anim.name;
+
+				socket.sendMessage(msg);
 			});
 		} else {
 			console.log("received unknown message", msg);

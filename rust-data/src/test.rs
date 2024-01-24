@@ -34,12 +34,12 @@ fn save_list_to_redis() {
     // try serialize_json_list
     let list = vec![
         AnimationMetadata {
-            name: "yoga-starting".to_string(),
+            name: "greeting".to_string(),
             repeat: 0,
             text: Some("Hi there, how may I assist you today".to_string()),
         },
         AnimationMetadata {
-            name: "yoga-starting".to_string(),
+            name: "pointing-forward".to_string(),
             repeat: 0,
             text: None,
         }

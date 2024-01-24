@@ -182,6 +182,9 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for MyWebSocket {
 
                                 ctx.text(message); // Send the concatenated message
 
+                                // todo iterate over list, and get each animation data from redis
+                                // but do this on the client side, to reduce the size of data sent over the network
+
                                 println!("send messahe to client, size {}", msg_len);
                             }
                             _ => {
